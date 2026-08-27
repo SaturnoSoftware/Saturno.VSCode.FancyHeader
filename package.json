@@ -1,0 +1,182 @@
+{
+  "name": "saturno-fancy-header",
+  "displayName": "Saturno FancyHeader",
+  "description": "Insert configurable file header comments with project, date, and author metadata",
+  "publisher": "SaturnoSoftware",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SaturnoSoftware/vscode-fancy-header.git"
+  },
+  "bugs": {
+    "url": "https://github.com/SaturnoSoftware/vscode-fancy-header/issues"
+  },
+  "homepage": "https://github.com/SaturnoSoftware/vscode-fancy-header#readme",
+  "main": "./out/src/extension.js",
+  "icon": "res/images/icon.png",
+  "version": "2.0.0",
+  "build": 8,
+  "license": "GPL-3.0-only",
+  "engines": {
+    "vscode": "^1.88.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "header",
+    "file-header",
+    "comments",
+    "metadata",
+    "copyright",
+    "documentation",
+    "productivity"
+  ],
+  "galleryBanner": {
+    "color": "#1F2937",
+    "theme": "dark"
+  },
+  "pricing": "Free",
+  "qna": "marketplace",
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": true
+    },
+    "virtualWorkspaces": false
+  },
+  "activationEvents": [],
+  "contributes": {
+    "commands": [
+      {
+        "command": "saturno-fancy-header.addHeader",
+        "title": "Saturno: Add Header"
+      },
+      {
+        "command": "saturno-fancy-header.newTemplate",
+        "title": "Saturno: New Header Template"
+      },
+      {
+        "command": "saturno-fancy-header.editTemplates",
+        "title": "Saturno: Edit Header Templates"
+      }
+    ],
+    "configuration": {
+      "title": "Saturno FancyHeader",
+      "properties": {
+        "saturno-fancy-header.lineWidth": {
+          "type": "integer",
+          "default": 80,
+          "minimum": 40,
+          "maximum": 200,
+          "description": "Total width of generated header lines."
+        },
+        "saturno-fancy-header.fillChar": {
+          "type": "string",
+          "default": "-",
+          "minLength": 1,
+          "maxLength": 1,
+          "description": "Character used to fill the header border lines."
+        },
+        "saturno-fancy-header.authorName": {
+          "type": "string",
+          "default": "",
+          "description": "Optional author name override. When empty, FancyHeader uses Git config or the OS username."
+        },
+        "saturno-fancy-header.authorEmail": {
+          "type": "string",
+          "default": "",
+          "description": "Optional author email override. When empty, FancyHeader uses Git config when available."
+        },
+        "saturno-fancy-header.copyrightOwner": {
+          "type": "string",
+          "default": "",
+          "description": "Optional copyright owner. When empty, FancyHeader uses the resolved author name."
+        },
+        "saturno-fancy-header.templateLines": {
+          "type": "array",
+          "default": [
+            "  File      : FILENAME",
+            "  Project   : PROJECT",
+            "  Date      : DATE",
+            "  Copyright : YEAR",
+            "  Copyright : USER_NAME <USER_EMAIL>"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "description": "Template lines inserted between the header border lines. Supported placeholders: FILENAME, PROJECT, DATE, LAST_MODIFIED, YEAR, COPYRIGHT_OWNER, USER_NAME, USER_EMAIL."
+        },
+        "saturno-fancy-header.templateFile": {
+          "type": "string",
+          "default": "",
+          "description": "Optional path to a text file with the header template. Supports absolute paths, workspace-relative paths, ${workspaceFolder}, ${fileDirname}, and ~. When set, this overrides templateLines."
+        },
+        "saturno-fancy-header.templates": {
+          "type": "array",
+          "default": [],
+          "items": {
+            "type": "object",
+            "required": [
+              "name",
+              "path"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Template name shown in the Quick Pick."
+              },
+              "path": {
+                "type": "string",
+                "description": "Path to the editable template file."
+              }
+            }
+          },
+          "description": "Optional named template files. When more than one is configured, Saturno: Add Header shows a picker so you can choose which template to use."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "pwsh -NoLogo -NoProfile -Command \"if (Test-Path -LiteralPath ./out) { Remove-Item -LiteralPath ./out -Recurse -Force }\" && tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "eslint src libs tests --ext ts",
+    "test": "npm run compile && tsc -p tests/tsconfig.json && tsc -p libs/Saturno.VSCodeKit/tests/tsconfig.json && node --test out/tests/*.test.js out/libs/Saturno.VSCodeKit/tests/*.test.js",
+    "build": "npm run lint && npm run compile && pwsh -NoLogo -NoProfile -File ./Scripts/build.ps1 -ProjectRoot . -BuildOutputDir __BUILD/_staging",
+    "package": "pwsh -NoLogo -NoProfile -File ./Scripts/package-vsix.ps1",
+    "vscode:prepublish": "npm run compile"
+  },
+  "devDependencies": {
+    "@types/node": "18.x",
+    "@types/vscode": "^1.88.0",
+    "@typescript-eslint/eslint-plugin": "^7.4.0",
+    "@typescript-eslint/parser": "^7.4.0",
+    "@vscode/vsce": "^3.0.0",
+    "eslint": "^8.57.0",
+    "typescript": "5.3.3"
+  },
+  "dependencies": {
+    "json5": "^2.2.3"
+  },
+  "vsce": {
+    "baseImagesUrl": "https://raw.githubusercontent.com/SaturnoSoftware/vscode-fancy-header/main/"
+  },
+  "saturno": {
+    "cicd": {
+      "artifactPrefix": "Saturno.VSCode.FancyHeader",
+      "build": {
+        "stagingRoot": "__BUILD/_staging",
+        "expectedFiles": [
+          "package.json",
+          "out/src/extension.js"
+        ],
+        "expectedDirectories": [
+          "out/libs"
+        ]
+      },
+      "release": {
+        "assets": [
+          "*.vsix"
+        ]
+      }
+    }
+  }
+}

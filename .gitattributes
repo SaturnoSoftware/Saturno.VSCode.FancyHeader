@@ -1,0 +1,21 @@
+# Saturno cross-platform line-ending policy.
+* text=auto eol=lf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.png -text
+*.jpg -text
+*.jpeg -text
+*.gif -text
+*.webp -text
+*.ico -text
+*.pdf -text
+*.zip -text
+*.7z -text
+*.dll -text
+*.exe -text
+*.db -text
+*.sqlite -text
+*.sqlite3 -text
+*.xlsx -text
+*.docx -text
+*.pptx -text

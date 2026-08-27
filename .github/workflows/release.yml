@@ -1,0 +1,90 @@
+name: release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    name: Validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          submodules: recursive
+          token: ${{ secrets.SATURNO_CI_SUBMODULES_TOKEN || github.token }}
+
+      - name: Setup project
+        uses: ./.github/actions/setup
+        with:
+          submodules-token: ${{ secrets.SATURNO_CI_SUBMODULES_TOKEN || github.token }}
+
+      - name: Run tests
+        shell: pwsh
+        run: ./Saturno.CICD/test.ps1 -ProjectRoot $PWD
+
+  package:
+    name: Package
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [validate]
+    outputs:
+      release_name: ${{ steps.names.outputs.release_name }}
+      release_dir: ${{ steps.package.outputs.release_dir }}
+      archive_path: ${{ steps.names.outputs.archive_path }}
+      artifact_name: ${{ steps.names.outputs.artifact_name }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          submodules: recursive
+          token: ${{ secrets.SATURNO_CI_SUBMODULES_TOKEN || github.token }}
+
+      - name: Setup project
+        uses: ./.github/actions/setup
+        with:
+          submodules-token: ${{ secrets.SATURNO_CI_SUBMODULES_TOKEN || github.token }}
+
+      - name: Run build
+        shell: pwsh
+        run: ./Saturno.CICD/build.ps1 -ProjectRoot $PWD -BuildNumber $env:GITHUB_RUN_NUMBER
+
+      - name: Run package
+        id: package
+        shell: pwsh
+        run: ./Saturno.CICD/package.ps1 -ProjectRoot $PWD -BuildNumber $env:GITHUB_RUN_NUMBER
+
+      - name: Compute release metadata
+        id: names
+        shell: pwsh
+        run: ./Saturno.CICD/release/compute-metadata.ps1 -ProjectRoot $PWD
+
+      - name: Publish GitHub release asset
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: ./Saturno.CICD/release/publish-github-release.ps1 -Tag $env:GITHUB_REF_NAME -ArchivePath "${{ steps.names.outputs.archive_path }}"
+
+      - name: Publish Visual Studio Marketplace extension
+        shell: pwsh
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:VSCE_PAT)) {
+            Write-Host "VSCE_PAT not configured; skipping Visual Studio Marketplace publish."
+            exit 0
+          }
+          ./Scripts/publish-marketplace.ps1 -ProjectRoot $PWD -PackageOutputDir "${{ steps.package.outputs.release_dir }}"
