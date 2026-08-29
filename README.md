@@ -221,6 +221,14 @@ npm run build
 npm run package
 ```
 
+Before a release, `Scripts/smoke/run-smoke.ps1 -VsixPath <path-to-vsix>` installs the packaged
+`.vsix` into an isolated `--user-data-dir`/`--extensions-dir` and runs
+`Scripts/smoke/smokeTest.js` inside a real VS Code extension host to invoke `addHeader` and
+`editTemplates` and assert the document/editor actually changed - a clean-profile install and
+command smoke, not just a build that compiles. `newTemplate` prompts for a template name via
+`showInputBox` and has no non-interactive path, so it stays a manual check before publish
+(FANCYHDR-0015).
+
 ---
 
 ## Contributing
