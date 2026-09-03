@@ -57,6 +57,10 @@
       {
         "command": "saturno-fancy-header.editTemplates",
         "title": "Saturno: Edit Header Templates"
+      },
+      {
+        "command": "saturno-fancy-header.about",
+        "title": "Saturno: About FancyHeader"
       }
     ],
     "configuration": {
@@ -97,8 +101,8 @@
             "  File      : FILENAME",
             "  Project   : PROJECT",
             "  Date      : DATE",
-            "  Copyright : YEAR",
-            "  Copyright : USER_NAME <USER_EMAIL>"
+            "  Copyright : YEAR COPYRIGHT_OWNER",
+            "  Author    : USER_NAME <USER_EMAIL>"
           ],
           "items": {
             "type": "string"

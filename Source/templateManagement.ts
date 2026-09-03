@@ -89,7 +89,8 @@ export function resolveUniqueTemplatePath(
 
 // -----------------------------------------------------------------------------
 export function deriveTemplateNameFromFilePath(filePath: string): string {
-  const baseName = path.basename(filePath, path.extname(filePath));
+  const portablePath = filePath.replace(/\\/g, "/");
+  const baseName = path.posix.basename(portablePath, path.posix.extname(portablePath));
   const stripped = baseName.replace(/^_?header[-_]?/i, "");
   const parts = stripped.split(/[-_]+/).filter((part) => part.length > 0);
 

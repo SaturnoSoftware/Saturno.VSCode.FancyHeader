@@ -56,6 +56,15 @@ export function activate(context: vscode.ExtensionContext): void {
       async () => executeEditTemplates()
     )
   );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "saturno-fancy-header.about",
+      () => {
+        void executeAboutCommand(context);
+      }
+    )
+  );
 }
 
 // -----------------------------------------------------------------------------
@@ -283,4 +292,71 @@ function discoverTemplateFiles(directories: string[]): string[] {
   }
 
   return discovered.sort((a, b) => a.localeCompare(b));
+}
+
+// -----------------------------------------------------------------------------
+async function executeAboutCommand(context: vscode.ExtensionContext): Promise<void> {
+  const packageJson = context.extension.packageJSON as {
+    displayName?: string;
+    name?: string;
+    version?: string;
+    build?: string | number;
+  };
+  const extensionName = packageJson.displayName ?? packageJson.name ?? "Saturno FancyHeader";
+  const extensionVersion = packageJson.version ?? "unknown";
+  const extensionBuild = packageJson.build === undefined ? "unknown" : String(packageJson.build);
+  const panel = vscode.window.createWebviewPanel(
+    "saturnoFancyHeaderAbout",
+    "About Saturno FancyHeader",
+    vscode.ViewColumn.Active,
+    {
+      enableFindWidget: false,
+      localResourceRoots: [vscode.Uri.joinPath(context.extensionUri, "media")],
+    }
+  );
+
+  panel.webview.html = await loadAboutPanelHtml(panel.webview, context, {
+    extensionName,
+    extensionVersion,
+    extensionBuild,
+  });
+}
+
+interface AboutPanelModel {
+  extensionName: string;
+  extensionVersion: string;
+  extensionBuild: string;
+}
+
+// -----------------------------------------------------------------------------
+async function loadAboutPanelHtml(
+  webview: vscode.Webview,
+  context: vscode.ExtensionContext,
+  model: AboutPanelModel
+): Promise<string> {
+  const htmlUri = vscode.Uri.joinPath(context.extensionUri, "media", "about.html");
+  const styleUri = webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, "media", "about.css"));
+  const htmlTemplate = Buffer.from(await vscode.workspace.fs.readFile(htmlUri)).toString("utf8");
+
+  return htmlTemplate
+    .replaceAll("{{cspSource}}", webview.cspSource)
+    .replaceAll("{{styleUri}}", styleUri.toString())
+    .replaceAll("{{extensionName}}", escapeHtml(orFallback(model.extensionName, "Saturno FancyHeader")))
+    .replaceAll("{{extensionVersion}}", escapeHtml(orFallback(model.extensionVersion, "unknown")))
+    .replaceAll("{{extensionBuild}}", escapeHtml(orFallback(model.extensionBuild, "unknown")));
+}
+
+// -----------------------------------------------------------------------------
+function orFallback(value: string, fallback: string): string {
+  return value.trim().length > 0 ? value : fallback;
+}
+
+// -----------------------------------------------------------------------------
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/\"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }

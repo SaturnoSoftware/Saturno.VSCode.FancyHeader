@@ -11,12 +11,12 @@
 </p>
 
 <p align="center">
-  <b>Insert consistent file headers with one command.</b> Language-aware, configurable, and ready for real project templates.
+  <b>Make source identity clear with one command.</b> Language-aware, configurable, and template-driven.
   <br>
   <br>
 </p>
 
-**Saturno FancyHeader** is a VS Code extension that inserts structured file headers using the active language comment syntax plus file, project, date, and author metadata. It gives source files a clean, repeatable header without hand-written boilerplate.
+**Saturno FancyHeader** inserts structured file headers using the active language comment syntax plus file, project, date, copyright, and author metadata. It gives source files a clean, repeatable identity without hand-written boilerplate.
 
 Maintained by [Saturno.Software](https://saturno.software/).
 
@@ -24,9 +24,11 @@ Maintained by [Saturno.Software](https://saturno.software/).
 
 ## Quick Start
 
-### Install from VSIX
+### Install from Marketplace or VSIX
 
 ```bash
+code --install-extension SaturnoSoftware.saturno-fancy-header
+# or
 code --install-extension saturno-fancy-header-2.0.0.vsix
 ```
 
@@ -183,6 +185,7 @@ If you define `templates`, FancyHeader merges those named entries with the disco
 | `saturno-fancy-header.addHeader` | `Saturno: Add Header` | Insert a header with the active template and language comment syntax |
 | `saturno-fancy-header.newTemplate` | `Saturno: New Header Template` | Create a new template file, register it, and open it |
 | `saturno-fancy-header.editTemplates` | `Saturno: Edit Header Templates` | Pick and open an existing template file |
+| `saturno-fancy-header.about` | `Saturno: About FancyHeader` | Show installed version and build information |
 
 ---
 
@@ -277,5 +280,6 @@ A: Download or build the `.vsix`, then run `code --install-extension path-to-fil
 
 ---
 <p align="center">
-  <b>Made with &lt;3 by Saturno.Software</b>
+  <b>Saturno.Software</b>
+</p>
 </p>

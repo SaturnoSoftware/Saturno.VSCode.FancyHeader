@@ -1,6 +1,10 @@
 # Changelog
 
-## 2.0.0 — 2026-08-24
+## Unreleased
+
+- Add the About command and align the canonical header template with the Saturno standard.
+
+## 2.0.0 - 2026-08-24
 
 - Prevent duplicate generated headers at the start of a document for line and block comment syntaxes.
 - Move production Git metadata lookups to asynchronous commands so header insertion does not block the editor.
