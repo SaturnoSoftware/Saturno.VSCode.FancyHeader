@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
 import * as childProcess from "child_process";
 import * as fs from "fs";
 import * as os from "os";

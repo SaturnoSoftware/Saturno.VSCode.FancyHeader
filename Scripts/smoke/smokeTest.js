@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
 // Extension-host smoke test for the packaged saturno-fancy-header .vsix.
 //
 // Runs inside a real VS Code extension host (launched with

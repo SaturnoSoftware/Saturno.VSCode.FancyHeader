@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
 import * as path from "path";
 import { DEFAULT_TEMPLATE_LINES, HeaderConfig, NamedHeaderTemplate, normalizeConfig } from "./formatting";
 
