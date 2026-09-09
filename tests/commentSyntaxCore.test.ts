@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
 import * as assert from "node:assert/strict";
-import { resolveCommentSyntaxFromComments } from "../libs/Saturno.VSCodeKit/src/CommentSyntaxCore";
+import { resolveCommentSyntaxFromComments } from "../Libraries/Saturno.FancyLib/src/CommentSyntaxCore";
 
 describe("resolveCommentSyntaxFromComments", () => {
   it("returns null for missing or empty language comment configuration", () => {

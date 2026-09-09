@@ -21,7 +21,7 @@
 import * as fs from "fs";
 import * as path from "path";
 import * as vscode from "vscode";
-import { getActiveEditor, getActiveFilePath, getCommentSyntaxForEditor, showError } from "../libs/Saturno.VSCodeKit/src";
+import { getActiveEditor, getActiveFilePath, getCommentSyntaxForEditor, showError } from "../Libraries/Saturno.FancyLib/src";
 import { DEFAULT_CONFIG, HeaderConfig, NamedHeaderTemplate, normalizeConfig, buildHeader, hasGeneratedHeaderAtDocumentStart } from "./formatting";
 import { getDefaultUserTemplateRoot, resolveConfiguredTemplateLines, resolveTemplateDataAsync } from "./runtime";
 import {
