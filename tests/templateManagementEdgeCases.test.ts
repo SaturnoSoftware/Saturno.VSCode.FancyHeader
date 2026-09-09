@@ -12,8 +12,8 @@ import {
   mergeTemplateSources,
   buildUpdatedTemplateList,
   getEditableTemplateCandidates,
-} from "../src/templateManagement";
-import { DEFAULT_CONFIG } from "../src/formatting";
+} from "../Source/templateManagement";
+import { DEFAULT_CONFIG } from "../Source/formatting";
 
 describe("slugifyTemplateName - extreme inputs", () => {
   it("handles empty string", () => {

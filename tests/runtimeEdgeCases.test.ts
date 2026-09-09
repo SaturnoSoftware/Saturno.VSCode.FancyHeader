@@ -11,8 +11,8 @@ import {
   resolveTemplateFilePath,
   resolveConfiguredTemplateLines,
   getDefaultUserTemplateRoot,
-} from "../src/runtime";
-import { DEFAULT_CONFIG } from "../src/formatting";
+} from "../Source/runtime";
+import { DEFAULT_CONFIG } from "../Source/formatting";
 
 describe("findGitRootFromFilePath - edge cases", () => {
   it("returns null when no .git directory exists anywhere", () => {

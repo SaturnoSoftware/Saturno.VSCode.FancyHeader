@@ -1,7 +1,7 @@
 import { describe, it } from "node:test";
 import * as assert from "node:assert/strict";
 import * as path from "node:path";
-import { DEFAULT_CONFIG } from "../src/formatting";
+import { DEFAULT_CONFIG } from "../Source/formatting";
 import {
   buildNewTemplateContent,
   buildTemplateFileName,
@@ -13,8 +13,8 @@ import {
   mergeTemplateSources,
   resolveUniqueTemplatePath,
   slugifyTemplateName,
-} from "../src/templateManagement";
-import { getDefaultUserTemplateRoot } from "../src/runtime";
+} from "../Source/templateManagement";
+import { getDefaultUserTemplateRoot } from "../Source/runtime";
 
 const TEMPLATES_ROOT = process.platform === "win32"
   ? "D:\\Templates"

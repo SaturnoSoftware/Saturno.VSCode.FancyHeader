@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
 import * as assert from "node:assert/strict";
-import { buildHeader, buildHeaderLine, replaceTemplateTokens, hasGeneratedHeaderAtDocumentStart, CommentSyntax, DEFAULT_CONFIG, HeaderTemplateData } from "../src/formatting";
+import { buildHeader, buildHeaderLine, replaceTemplateTokens, hasGeneratedHeaderAtDocumentStart, CommentSyntax, DEFAULT_CONFIG, HeaderTemplateData } from "../Source/formatting";
 
 const cStyleSyntax: CommentSyntax = {
   singleLineStart: "//",

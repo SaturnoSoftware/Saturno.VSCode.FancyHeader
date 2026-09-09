@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
 import * as assert from "node:assert/strict";
-import { DEFAULT_CONFIG, DEFAULT_TEMPLATE_LINES, normalizeConfig } from "../src/formatting";
+import { DEFAULT_CONFIG, DEFAULT_TEMPLATE_LINES, normalizeConfig } from "../Source/formatting";
 
 describe("normalizeConfig", () => {
   it("keeps valid custom values", () => {

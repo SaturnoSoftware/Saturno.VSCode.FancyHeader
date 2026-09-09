@@ -11,7 +11,7 @@
     "url": "https://github.com/SaturnoSoftware/vscode-fancy-header/issues"
   },
   "homepage": "https://github.com/SaturnoSoftware/vscode-fancy-header#readme",
-  "main": "./out/src/extension.js",
+  "main": "./out/Source/extension.js",
   "icon": "res/images/icon.png",
   "version": "2.0.0",
   "build": 9,
@@ -142,7 +142,7 @@
   "scripts": {
     "compile": "pwsh -NoLogo -NoProfile -Command \"if (Test-Path -LiteralPath ./out) { Remove-Item -LiteralPath ./out -Recurse -Force }\" && tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "lint": "eslint src libs tests --ext ts",
+    "lint": "eslint Source libs Tests --ext ts",
     "test": "npm run compile && tsc -p tests/tsconfig.json && tsc -p libs/Saturno.VSCodeKit/tests/tsconfig.json && node --test out/tests/*.test.js out/libs/Saturno.VSCodeKit/tests/*.test.js",
     "build": "npm run lint && npm run compile && pwsh -NoLogo -NoProfile -File ./Scripts/build.ps1 -ProjectRoot . -BuildOutputDir __BUILD/_staging",
     "package": "pwsh -NoLogo -NoProfile -File ./Scripts/package-vsix.ps1",
@@ -170,7 +170,7 @@
         "stagingRoot": "__BUILD/_staging",
         "expectedFiles": [
           "package.json",
-          "out/src/extension.js"
+          "out/Source/extension.js"
         ],
         "expectedDirectories": [
           "out/libs"

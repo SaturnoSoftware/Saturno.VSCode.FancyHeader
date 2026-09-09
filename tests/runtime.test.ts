@@ -3,8 +3,8 @@ import * as assert from "node:assert/strict";
 import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
-import { calculateCopyrightYear, formatDateYYYYMMDD } from "../src/formatting";
-import { DEFAULT_CONFIG } from "../src/formatting";
+import { calculateCopyrightYear, formatDateYYYYMMDD } from "../Source/formatting";
+import { DEFAULT_CONFIG } from "../Source/formatting";
 import {
   findGitRootFromFilePath,
   readGitUserInfoFromConfigFiles,
@@ -14,7 +14,7 @@ import {
   resolveLastModifiedDate,
   resolveTemplateFilePath,
   resolveTemplateDataAsync,
-} from "../src/runtime";
+} from "../Source/runtime";
 
 const PLATFORM_TEST_ROOT = process.platform === "win32"
   ? "D:\\Projects\\repo"
