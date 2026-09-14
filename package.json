@@ -173,7 +173,7 @@
           "out/Source/extension.js"
         ],
         "expectedDirectories": [
-          "out/libs"
+          "out/Libraries"
         ]
       },
       "release": {
