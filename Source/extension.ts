@@ -14,16 +14,34 @@
 // Copyright : Saturno Software - 2025 - 2026                                 //
 // Author    : mateusdigital <hello@mateus.digital>                           //
 // -------------------------------------------------------------------------- //
-// SPDX-License-Identifier: GPL-3.0-only
 
-
-
+// -----------------------------------------------------------------------------
 import * as fs from "fs";
 import * as path from "path";
 import * as vscode from "vscode";
-import { getActiveEditor, getActiveFilePath, getCommentSyntaxForEditor, showError } from "../Libraries/Saturno.FancyLib/src";
-import { DEFAULT_CONFIG, HeaderConfig, NamedHeaderTemplate, normalizeConfig, buildHeader, hasGeneratedHeaderAtDocumentStart } from "./formatting";
-import { getDefaultUserTemplateRoot, resolveConfiguredTemplateLines, resolveTemplateDataAsync } from "./runtime";
+// -----------------------------------------------------------------------------
+import {
+  getActiveEditor,
+  getActiveFilePath,
+  getCommentSyntaxForEditor,
+  showError
+} from "../Libraries/Saturno.VSCode.FancyLib/Source";
+
+import {
+  DEFAULT_CONFIG,
+  HeaderConfig,
+  NamedHeaderTemplate,
+  normalizeConfig,
+  buildHeader,
+  hasGeneratedHeaderAtDocumentStart
+} from "./formatting";
+
+import {
+  getDefaultUserTemplateRoot,
+  resolveConfiguredTemplateLines,
+  resolveTemplateDataAsync
+} from "./runtime";
+
 import {
   buildNewTemplateContent,
   buildUpdatedTemplateList,
@@ -33,9 +51,20 @@ import {
   resolveUniqueTemplatePath,
 } from "./templateManagement";
 
+
+/*
+* Constants
+*/
+
+/* -------------------------------------------------------------------------- */
 const CONFIG_SECTION = "saturno-fancy-header";
 
-// -----------------------------------------------------------------------------
+
+/*
+* Functions
+*/
+
+/* -------------------------------------------------------------------------- */
 export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(
     vscode.commands.registerCommand(
@@ -111,11 +140,13 @@ async function executeAddHeader(): Promise<void> {
     void vscode.window.showInformationMessage("Saturno FancyHeader: this file already has a generated header.");
     return;
   }
+
   const workspaceFolder = vscode.workspace.getWorkspaceFolder(editor.document.uri);
   const workspaceFolderPath = workspaceFolder?.uri.fsPath ?? null;
   const workspaceFolderName = workspaceFolder?.name ?? null;
   const availableTemplates = getAvailableTemplates(config);
   const selectedTemplate = await chooseNamedTemplate(availableTemplates);
+
   if (selectedTemplate === undefined) {
     return;
   }
@@ -323,6 +354,7 @@ async function executeAboutCommand(context: vscode.ExtensionContext): Promise<vo
   });
 }
 
+// -----------------------------------------------------------------------------
 interface AboutPanelModel {
   extensionName: string;
   extensionVersion: string;
@@ -358,6 +390,6 @@ function escapeHtml(value: string): string {
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
-    .replace(/\"/g, "&quot;")
+    .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
 }

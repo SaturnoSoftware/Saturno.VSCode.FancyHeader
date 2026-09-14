@@ -1,11 +1,29 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// -------------------------------------------------------------------------- //
+//                               *       +                                    //
+//                         '                  |                               //
+//                     ()    .-.,="``"=.    - o -                             //
+//                           '=/_       \\     |                              //
+//                        *   |  '=._    |                                    //
+//                             \\     `=./`,        '                         //
+//                          .   '=.__.=' `='      *                           //
+//                                                                            //
+//                                                                            //
+// File      : runtime.ts                                                     //
+// Project   : Saturno.Fancy.Header                                           //
+// Date      : 2026-09-03                                                     //
+// Copyright : Saturno Software - 2026                                        //
+// Author    : mateusdigital <hello@mateus.digital>                           //
+// -------------------------------------------------------------------------- //
 
+
+// -----------------------------------------------------------------------------
 import * as childProcess from "child_process";
 import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
 import { HeaderConfig, HeaderTemplateData, calculateCopyrightYear, formatDateYYYYMMDD } from "./formatting";
 
+// -----------------------------------------------------------------------------
 export interface GitUserInfo {
   name: string;
   email: string;
@@ -89,6 +107,7 @@ export async function resolveTemplateDataAsync(
   };
 }
 
+// -----------------------------------------------------------------------------
 function runGitAsync(cwd: string, args: string[]): Promise<string | null> {
   return new Promise((resolve) => {
     childProcess.execFile("git", ["-C", cwd, ...args], { encoding: "utf8", windowsHide: true }, (error, stdout) => {
@@ -97,18 +116,21 @@ function runGitAsync(cwd: string, args: string[]): Promise<string | null> {
   });
 }
 
+// -----------------------------------------------------------------------------
 async function getLastGitModifiedDateAsync(gitRoot: string, filePath: string): Promise<Date | null> {
   const relativeFilePath = path.relative(gitRoot, filePath);
   const output = await runGitAsync(gitRoot, ["log", "-1", "--format=%cs", "--", relativeFilePath]);
   return output ? parseDate(output.trim()) : null;
 }
 
+// -----------------------------------------------------------------------------
 async function getInitialFileDateAsync(filePath: string): Promise<Date | null> {
   const output = await runGitAsync(path.dirname(filePath), ["log", "--follow", "--format=%ad", "--date=format:%Y-%m-%d", "--reverse", "--", filePath]);
   const firstLine = output?.split(/\r?\n/, 1)[0]?.trim();
   return firstLine ? parseDate(firstLine) : null;
 }
 
+// -----------------------------------------------------------------------------
 async function getFileModificationDateAsync(filePath: string): Promise<Date | null> {
   try {
     return (await fs.promises.stat(filePath)).mtime;
@@ -116,6 +138,8 @@ async function getFileModificationDateAsync(filePath: string): Promise<Date | nu
     return null;
   }
 }
+
+// -----------------------------------------------------------------------------
 export function resolveAuthorInfo(
   authorNameOverride: string,
   authorEmailOverride: string,
@@ -213,8 +237,9 @@ export function resolveLastModifiedDate(
 // -----------------------------------------------------------------------------
 export function findGitRootFromFilePath(filePath: string): string | null {
   let currentDirectory = path.dirname(path.resolve(filePath));
+  const temporaryRoot = path.resolve(os.tmpdir());
 
-  while (!fs.existsSync(path.join(currentDirectory, ".git"))) {
+  while (currentDirectory !== temporaryRoot && !fs.existsSync(path.join(currentDirectory, ".git"))) {
 
     const parentDirectory = path.dirname(currentDirectory);
     if (parentDirectory === currentDirectory) {
@@ -224,7 +249,7 @@ export function findGitRootFromFilePath(filePath: string): string | null {
     currentDirectory = parentDirectory;
   }
 
-  return currentDirectory;
+  return currentDirectory === temporaryRoot ? null : currentDirectory;
 }
 
 // -----------------------------------------------------------------------------

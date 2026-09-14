@@ -1,7 +1,27 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// -------------------------------------------------------------------------- //
+//                               *       +                                    //
+//                         '                  |                               //
+//                     ()    .-.,="``"=.    - o -                             //
+//                           '=/_       \\     |                              //
+//                        *   |  '=._    |                                    //
+//                             \\     `=./`,        '                         //
+//                          .   '=.__.=' `='      *                           //
+//                                                                            //
+//                                                                            //
+// File      : templateManagement.ts                                          //
+// Project   : Saturno.Fancy.Header                                           //
+// Date      : 2026-09-03                                                     //
+// Copyright : Saturno Software - 2026                                        //
+// Author    : mateusdigital <hello@mateus.digital>                           //
+// -------------------------------------------------------------------------- //
 
+// -----------------------------------------------------------------------------
 import * as path from "path";
 import { DEFAULT_TEMPLATE_LINES, HeaderConfig, NamedHeaderTemplate, normalizeConfig } from "./formatting";
+
+/*
+*  Functions
+*/
 
 // -----------------------------------------------------------------------------
 export function slugifyTemplateName(name: string): string {

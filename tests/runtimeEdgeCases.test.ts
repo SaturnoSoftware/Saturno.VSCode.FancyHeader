@@ -265,7 +265,6 @@ describe("readGitUserInfoFromConfigFiles - malicious inputs", () => {
   });
 
   it("handles non-existent config file gracefully", () => {
-    const fakePath = "/this/does/not/exist/.gitconfig";
     const result = readGitUserInfoFromConfigFiles(null, "/this/does/not/exist");
     assert.strictEqual(result, null);
   });

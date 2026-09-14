@@ -1,10 +1,30 @@
+## -------------------------------------------------------------------------- ##
+##                               *       +                                    ##
+##                         '                  |                               ##
+##                     ()    .-.,="``"=.    - o -                             ##
+##                           '=/_       \\     |                              ##
+##                        *   |  '=._    |                                    ##
+##                             \\     `=./`,        '                         ##
+##                          .   '=.__.=' `='      *                           ##
+##                                                                            ##
+##                                                                            ##
+## File      : package-vsix.ps1                                               ##
+## Project   : Saturno.Fancy.Header                                           ##
+## Date      : 2026-08-27                                                     ##
+## Copyright : Saturno Software - 2026                                        ##
+## Author    : mateusdigital <hello@mateus.digital>                           ##
+## -------------------------------------------------------------------------- ##
+
 param(
     [string]$ProjectRoot = (Split-Path $PSScriptRoot -Parent),
-    # NOT under out/: `vscode:prepublish` runs `compile`, which deletes ./out
-    # recursively. vsce triggers prepublish itself, so anything this script creates
-    # under out/ is gone by the time vsce writes - see FANCYHDR-0037.
-    # A dedicated subdirectory of __DIST is safe to wipe and leaves the versioned
-    # release folders beside it alone.
+    ##
+    ## NOT under out/: `vscode:prepublish` runs `compile`, which deletes ./out
+    ## recursively. vsce triggers prepublish itself, so anything this script creates
+    ## under out/ is gone by the time vsce writes - see FANCYHDR-0037.
+    ##
+    ## A dedicated subdirectory of __DIST is safe to wipe and leaves the versioned
+    ## release folders beside it alone.
+    ##
     [string]$PackageOutputDir = (Join-Path $ProjectRoot "__DIST/vsix"),
     [string]$ReleaseName = "vscode-fancy-header"
 )
@@ -14,37 +34,39 @@ $ProjectRoot = (Resolve-Path -LiteralPath $ProjectRoot).ProviderPath
 
 Write-Host "==> Packaging: $ReleaseName"
 
-# The artifact name comes from package.json, and the full file path goes to
-# `--out`.
-#
-# FANCYHDR-0037. The chain, measured on vsce 3.9.1:
-#
-#   1. This script created `out/package/` and called
-#      `vsce package --out "out/package/"`.
-#   2. vsce runs `vscode:prepublish` itself, which here is `compile`, which does
-#      `Remove-Item ./out -Recurse`. The directory was deleted between step 1
-#      and the moment vsce wrote.
-#   3. `--out <path>/` behaves differently depending on whether the directory
-#      exists at write time - verified both ways:
-#        - directory present -> the archive is written INSIDE it, named correctly
-#        - directory absent  -> a FILE is created at the literal path, so
-#          `out/package/` produced an extensionless file called `package`
-#      A valid zip that VS Code will not install and the marketplace rejects.
-#   4. The guard that should have caught it did not. See the note below.
-#
-# Two changes remove the whole chain: package outside `out/` so prepublish cannot
-# delete the destination, and pass the full file path so the result does not
-# depend on whether a directory happens to exist.
+## The artifact name comes from package.json, and the full file
+## path goes to `--out`.
+##
+## FANCYHDR-0037. The chain, measured on vsce 3.9.1:
+##
+##   1. This script created `out/package/` and called
+##      `vsce package --out "out/package/"`.
+##   2. vsce runs `vscode:prepublish` itself, which here is `compile`, which does
+##      `Remove-Item ./out -Recurse`. The directory was deleted between step 1
+##      and the moment vsce wrote.
+##   3. `--out <path>/` behaves differently depending on whether the directory
+##      exists at write time - verified both ways:
+##        - directory present -> the archive is written INSIDE it, named correctly
+##        - directory absent  -> a FILE is created at the literal path, so
+##          `out/package/` produced an extensionless file called `package`
+##      A valid zip that VS Code will not install and the marketplace rejects.
+##   4. The guard that should have caught it did not. See the note below.
+##
+## Two changes remove the whole chain: package outside `out/` so prepublish cannot
+## delete the destination, and pass the full file path so the result does not
+## depend on whether a directory happens to exist.
 $ManifestPath = Join-Path $ProjectRoot "package.json"
 $Manifest = Get-Content -LiteralPath $ManifestPath -Raw | ConvertFrom-Json
 if (-not $Manifest.name -or -not $Manifest.version) {
     throw "package.json must declare both `name` and `version` to build the .vsix name."
 }
+
 $ExpectedName = "{0}-{1}.vsix" -f $Manifest.name, $Manifest.version
 $ExpectedPath = Join-Path $PackageOutputDir $ExpectedName
 
 Remove-Item -LiteralPath $PackageOutputDir -Recurse -Force -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Force -Path $PackageOutputDir | Out-Null
+
 
 Push-Location $ProjectRoot
 try {
@@ -55,16 +77,7 @@ finally {
     Pop-Location
 }
 
-# Verify what was produced, not that something exists.
-#
-# FANCYHDR-0037: the previous guard was
-#     Get-ChildItem -Path $PackageOutputDir -Filter "*.vsix"
-# which silently ignores `-Filter` when the path resolves to a FILE rather than
-# a directory. Once vsce turned the output directory into a file, that guard
-# returned the broken artifact and the script reported success - the check that
-# existed to catch this case is the reason it went unnoticed.
 $Produced = @(Get-ChildItem -LiteralPath $PackageOutputDir -File -ErrorAction SilentlyContinue)
-
 if (-not (Test-Path -LiteralPath $ExpectedPath -PathType Leaf)) {
     $Found = if ($Produced) { ($Produced | ForEach-Object { $_.Name }) -join ", " } else { "nothing" }
     throw "Expected $ExpectedName in $PackageOutputDir; found $Found."

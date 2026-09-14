@@ -1,10 +1,10 @@
 <p align="center">
-    <img src="res/images/icon.png" alt="Saturno FancyHeader" width="160">
+    <img src="Resources/images/icon.png" alt="Saturno FancyHeader" width="160">
 </p>
 
 <p align="center">
-    <a href="https://github.com/SaturnoSoftware/Saturno.VSCode.FancyHeader/releases/tag/v1.1.6"><img src="https://badgen.net/github/release/SaturnoSoftware/vscode-fancy-header?cache=600" alt="latest release"></a>
-    <a href="https://github.com/SaturnoSoftware/Saturno.VSCode.FancyComments"><img src="https://badgen.net/github/commits/SaturnoSoftware/vscode-fancy-header?cache=600" alt="commits"></a>
+    <a href="https://github.com/SaturnoSoftware/Saturno.VSCode.FancyHeader/releases"><img src="https://badgen.net/github/release/SaturnoSoftware/Saturno.VSCode.FancyHeader?cache=600" alt="latest release"></a>
+    <a href="https://github.com/SaturnoSoftware/Saturno.VSCode.FancyHeader/commits"><img src="https://badgen.net/github/commits/SaturnoSoftware/Saturno.VSCode.FancyHeader?cache=600" alt="commits"></a>
     <a href="./LICENSE.txt"><img src="https://badgen.net/badge/license/GPL--3.0/blue" alt="License: GPL-3.0"></a>
     <a href="./tests"><img src="https://badgen.net/badge/tests/CI%20verified/green" alt="Tests: CI verified"></a>
     <a href="https://marketplace.visualstudio.com/items?itemName=SaturnoSoftware.saturno-fancy-header"><img src="https://badgen.net/badge/platform/VS%20Code%20%5E1.88.0/blue" alt="Platform"></a>
@@ -29,7 +29,7 @@ Maintained by [Saturno.Software](https://saturno.software/).
 ```bash
 code --install-extension SaturnoSoftware.saturno-fancy-header
 # or
-code --install-extension saturno-fancy-header-2.0.0.vsix
+code --install-extension saturno-fancy-header-x.y.z.vsix
 ```
 
 ### Use
@@ -55,7 +55,7 @@ Optional template commands:
 //   Project   : my-project
 //   Date      : 2026-05-31
 //   Copyright : 2026 Saturno Software
-//   Author    : Mateus <mateus@example.com>
+//   Author    : Mateus <mateus@saturno.software>
 // ------------------------------------------------------------------------------
 ```
 
@@ -76,17 +76,17 @@ Optional template commands:
 
 ### From GitHub Release
 
-Download the latest `.vsix` from [Releases](https://github.com/SaturnoSoftware/vscode-fancy-header/releases), then install it:
+Download the latest `.vsix` from [Releases](https://github.com/SaturnoSoftware/Saturno.VSCode.FancyHeader/releases), then install it:
 
 ```bash
-code --install-extension saturno-fancy-header-2.0.0.vsix
+code --install-extension saturno-fancy-header-x.y.z.vsix
 ```
 
 ### From Source
 
 ```bash
-git clone https://github.com/SaturnoSoftware/vscode-fancy-header
-cd vscode-fancy-header
+git clone https://github.com/SaturnoSoftware/Saturno.VSCode.FancyHeader
+cd Saturno.VSCode.FancyHeader
 git submodule update --init --recursive
 npm install
 npm run package
@@ -214,35 +214,6 @@ Template selection follows this order:
 
 ---
 
-## Local Development
-
-```bash
-git submodule update --init --recursive
-npm install
-npm test
-npm run build
-npm run package
-```
-
-Before a release, `Scripts/smoke/run-smoke.ps1 -VsixPath <path-to-vsix>` installs the packaged
-`.vsix` into an isolated `--user-data-dir`/`--extensions-dir` and runs
-`Scripts/smoke/smokeTest.js` inside a real VS Code extension host to invoke `addHeader` and
-`editTemplates` and assert the document/editor actually changed - a clean-profile install and
-command smoke, not just a build that compiles. `newTemplate` prompts for a template name via
-`showInputBox` and has no non-interactive path, so it stays a manual check before publish
-(FANCYHDR-0015).
-
----
-
-## Contributing
-
-Contributions welcome! Please:
-
-- follow existing code style
-- add tests for new features
-- submit pull requests against `main`
-
----
 
 ## License
 
@@ -266,20 +237,17 @@ A: From the extension settings first, then Git config when available, then local
 **Q: What happens if I run Add Header twice?**
 A: A complete generated header already at the document start is detected, so the second invocation does not change the file.
 
-**Q: How do I install without a marketplace listing?**
-A: Download or build the `.vsix`, then run `code --install-extension path-to-file.vsix`.
-
 ---
 
 ## Links
 
-- [GitHub Repository](https://github.com/SaturnoSoftware/vscode-fancy-header)
-- [GitHub Releases](https://github.com/SaturnoSoftware/vscode-fancy-header/releases)
-- [Issues](https://github.com/SaturnoSoftware/vscode-fancy-header/issues)
+- [GitHub Repository](https://github.com/SaturnoSoftware/Saturno.VSCode.FancyHeader)
+- [GitHub Releases](https://github.com/SaturnoSoftware/Saturno.VSCode.FancyHeader/releases)
+- [Issues](https://github.com/SaturnoSoftware/Saturno.VSCode.FancyHeader/issues)
 - [Saturno.Software](https://saturno.software/)
 
 ---
+
 <p align="center">
-  <b>Saturno.Software</b>
-</p>
+  <b>Made with &lt;3 by Saturno.Software</b>
 </p>

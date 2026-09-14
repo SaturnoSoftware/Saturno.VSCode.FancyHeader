@@ -1,9 +1,26 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// -------------------------------------------------------------------------- //
+//                               *       +                                    //
+//                         '                  |                               //
+//                     ()    .-.,="``"=.    - o -                             //
+//                           '=/_       \\     |                              //
+//                        *   |  '=._    |                                    //
+//                             \\     `=./`,        '                         //
+//                          .   '=.__.=' `='      *                           //
+//                                                                            //
+//                                                                            //
+// File      : formatting.ts                                                  //
+// Project   : Saturno.Fancy.Header                                           //
+// Date      : 2026-09-03                                                     //
+// Copyright : Saturno Software - 2026                                        //
+// Author    : mateusdigital <hello@mateus.digital>                           //
+// -------------------------------------------------------------------------- //
 
-import { CommentSyntax } from "../Libraries/Saturno.FancyLib/src/Types";
 
+import { clamp } from "../Libraries/Saturno.VSCode.FancyLib/Source/Utils";
+import { CommentSyntax } from "../Libraries/Saturno.VSCode.FancyLib/Source/Types";
 export { CommentSyntax };
 
+// -----------------------------------------------------------------------------
 export interface HeaderTemplateData {
   fileName: string;
   projectName: string;
@@ -15,11 +32,13 @@ export interface HeaderTemplateData {
   userEmail: string;
 }
 
+// -----------------------------------------------------------------------------
 export interface NamedHeaderTemplate {
   name: string;
   path: string;
 }
 
+// -----------------------------------------------------------------------------
 export interface HeaderConfig {
   lineWidth: number;
   fillChar: string;
@@ -31,6 +50,11 @@ export interface HeaderConfig {
   copyrightOwner: string;
 }
 
+/*
+*  Constants
+*/
+
+// -----------------------------------------------------------------------------
 export const DEFAULT_TEMPLATE_LINES = [
   "  File      : FILENAME",
   "  Project   : PROJECT",
@@ -39,6 +63,7 @@ export const DEFAULT_TEMPLATE_LINES = [
   "  Author    : USER_NAME <USER_EMAIL>",
 ];
 
+// -----------------------------------------------------------------------------
 export const DEFAULT_CONFIG: HeaderConfig = {
   lineWidth: 80,
   fillChar: "-",
@@ -49,6 +74,12 @@ export const DEFAULT_CONFIG: HeaderConfig = {
   authorEmail: "",
   copyrightOwner: "",
 };
+
+
+
+/*
+*  Functions
+*/
 
 // -----------------------------------------------------------------------------
 export function normalizeConfig(config: Partial<HeaderConfig> = {}): HeaderConfig {
@@ -89,7 +120,10 @@ export function formatDateYYYYMMDD(date: Date): string {
 }
 
 // -----------------------------------------------------------------------------
-export function calculateCopyrightYear(fileDate: Date, currentDate: Date = new Date()): string {
+export function calculateCopyrightYear(
+  fileDate: Date,
+  currentDate: Date = new Date()
+): string {
   const startYear = fileDate.getFullYear();
   const currentYear = currentDate.getFullYear();
 
@@ -130,7 +164,9 @@ function normalizeTemplateLines(templateLines: string[] | undefined): string[] {
 }
 
 // -----------------------------------------------------------------------------
-function normalizeNamedTemplates(templates: NamedHeaderTemplate[] | undefined): NamedHeaderTemplate[] {
+function normalizeNamedTemplates(
+  templates: NamedHeaderTemplate[] | undefined
+): NamedHeaderTemplate[] {
   if (!Array.isArray(templates)) {
     return [];
   }
@@ -190,6 +226,7 @@ export function replaceTemplateTokens(line: string, data: HeaderTemplateData): s
   return result.replace(/[ \t]+$/g, "");
 }
 
+// -----------------------------------------------------------------------------
 export function hasGeneratedHeaderAtDocumentStart(
   documentText: string,
   syntax: CommentSyntax,
@@ -217,10 +254,6 @@ export function hasGeneratedHeaderAtDocumentStart(
   }
 
   return false;
-}
-// -----------------------------------------------------------------------------
-function clamp(value: number, min: number, max: number): number {
-  return Math.min(Math.max(value, min), max);
 }
 
 // -----------------------------------------------------------------------------

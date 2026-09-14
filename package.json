@@ -5,16 +5,16 @@
   "publisher": "SaturnoSoftware",
   "repository": {
     "type": "git",
-    "url": "https://github.com/SaturnoSoftware/vscode-fancy-header.git"
+    "url": "https://github.com/SaturnoSoftware/Saturno.VSCode.FancyHeader.git"
   },
   "bugs": {
-    "url": "https://github.com/SaturnoSoftware/vscode-fancy-header/issues"
+    "url": "https://github.com/SaturnoSoftware/Saturno.VSCode.FancyHeader/issues"
   },
-  "homepage": "https://github.com/SaturnoSoftware/vscode-fancy-header#readme",
+  "homepage": "https://github.com/SaturnoSoftware/Saturno.VSCode.FancyHeader#readme",
   "main": "./out/Source/extension.js",
   "icon": "res/images/icon.png",
   "version": "2.0.0",
-  "build": 9,
+  "build": 10,
   "license": "GPL-3.0-only",
   "engines": {
     "vscode": "^1.88.0"
@@ -143,7 +143,7 @@
     "compile": "pwsh -NoLogo -NoProfile -Command \"if (Test-Path -LiteralPath ./out) { Remove-Item -LiteralPath ./out -Recurse -Force }\" && tsc -p ./",
     "watch": "tsc -watch -p ./",
     "lint": "eslint Source Libraries Tests --ext ts",
-    "test": "npm run compile && tsc -p tests/tsconfig.json && tsc -p Libraries/Saturno.FancyLib/tests/tsconfig.json && node --test out/tests/*.test.js out/Libraries/Saturno.FancyLib/tests/*.test.js",
+    "test": "npm run compile && tsc -p tests/tsconfig.json && tsc -p Libraries/Saturno.VSCode.FancyLib/tests/tsconfig.json && node --test out/tests/*.test.js out/Libraries/Saturno.VSCode.FancyLib/tests/*.test.js",
     "build": "npm run lint && npm run compile && pwsh -NoLogo -NoProfile -File ./Scripts/build.ps1 -ProjectRoot . -BuildOutputDir __BUILD/_staging",
     "package": "pwsh -NoLogo -NoProfile -File ./Scripts/package-vsix.ps1",
     "vscode:prepublish": "npm run compile"
@@ -161,7 +161,7 @@
     "json5": "^2.2.3"
   },
   "vsce": {
-    "baseImagesUrl": "https://raw.githubusercontent.com/SaturnoSoftware/vscode-fancy-header/main/"
+    "baseImagesUrl": "https://raw.githubusercontent.com/SaturnoSoftware/Saturno.VSCode.FancyHeader/main/"
   },
   "saturno": {
     "cicd": {

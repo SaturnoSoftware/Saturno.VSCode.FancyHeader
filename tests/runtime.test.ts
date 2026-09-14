@@ -165,7 +165,7 @@ describe("git metadata helpers", () => {
     const workspaceRoot = process.platform === "win32"
       ? "D:\\Projects\\saturnosoftware"
       : "/projects/saturnosoftware";
-    const repoRoot = path.join(workspaceRoot, "repos_internal", "Fancy", "Saturno.FancyLib");
+    const repoRoot = path.join(workspaceRoot, "repos_internal", "Fancy", "Saturno.VSCode.FancyLib");
     const filePath = path.join(repoRoot, "src", "EditorUtils.ts");
 
     assert.strictEqual(
@@ -174,7 +174,7 @@ describe("git metadata helpers", () => {
         repoRoot,        // gitRoot (more specific)
         workspaceRoot    // workspaceFolderPath (parent monorepo)
       ),
-      "Saturno.FancyLib"
+      "Saturno.VSCode.FancyLib"
     );
   });
 

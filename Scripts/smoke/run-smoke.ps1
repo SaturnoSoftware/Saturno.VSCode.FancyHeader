@@ -4,13 +4,6 @@ param(
     [string]$ProfileRoot = (Join-Path ([System.IO.Path]::GetTempPath()) ("saturno-fancy-header-smoke-" + [Guid]::NewGuid().ToString("N")))
 )
 
-# Clean-profile install and command smoke test for the packaged .vsix.
-# FANCYHDR-0015: "clean-profile install and both-command smoke" is a real
-# assertion, not a claim - this launches a real VS Code extension host with an
-# isolated --user-data-dir/--extensions-dir, installs the .vsix into it, and
-# runs Scripts/smoke/smokeTest.js inside that host to invoke addHeader and
-# editTemplates. Mirrors vscode-fancy-comments/Scripts/smoke/run-smoke.ps1.
-
 $ErrorActionPreference = "Stop"
 
 if (-not (Test-Path -LiteralPath $VsixPath -PathType Leaf)) {
@@ -45,10 +38,6 @@ try {
     $SmokeTestPath = Join-Path $PSScriptRoot "smokeTest.js"
     Write-Host "==> Running command smoke test: $SmokeTestPath"
 
-    # No --wait: the extension host is expected to exit on its own once
-    # smokeTest.js's run() callback fires. Started via Start-Process with an
-    # explicit timeout so a display-less environment fails loudly (and gets
-    # its process tree cleaned up) instead of hanging the caller forever.
     $CodeExe = $CodeCmd.Source
     $Args = @(
         "--user-data-dir", $UserDataDir,
