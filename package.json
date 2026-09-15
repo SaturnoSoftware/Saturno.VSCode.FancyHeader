@@ -1,7 +1,7 @@
 {
   "name": "saturno-fancy-header",
   "displayName": "Saturno FancyHeader",
-  "description": "Insert configurable file header comments with project, date, and author metadata",
+  "description": "Standardize your file headers with reusable templates.",
   "publisher": "SaturnoSoftware",
   "repository": {
     "type": "git",
