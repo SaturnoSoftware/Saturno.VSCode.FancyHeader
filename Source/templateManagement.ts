@@ -9,7 +9,7 @@
 //                                                                            //
 //                                                                            //
 // File      : templateManagement.ts                                          //
-// Project   : Saturno.Fancy.Header                                           //
+// Project   : Saturno.VSCode.FancyHeader                                     //
 // Date      : 2026-09-03                                                     //
 // Copyright : Saturno Software - 2026                                        //
 // Author    : mateusdigital <hello@mateus.digital>                           //
