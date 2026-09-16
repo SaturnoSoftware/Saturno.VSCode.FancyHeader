@@ -13,8 +13,8 @@
   "homepage": "https://github.com/SaturnoSoftware/Saturno.VSCode.FancyHeader#readme",
   "main": "./out/Source/extension.js",
   "icon": "Resources/images/icon.png",
-  "version": "2.0.0",
-  "build": 10,
+  "version": "2.1.0",
+  "build": 13,
   "license": "GPL-3.0-only",
   "engines": {
     "vscode": "^1.88.0"
@@ -158,7 +158,7 @@
     "lint": "eslint Source Libraries Tests --ext ts",
     "test": "npm run compile && tsc -p tests/tsconfig.json && tsc -p Libraries/Saturno.VSCode.FancyLib/tests/tsconfig.json && node --test out/tests/*.test.js out/Libraries/Saturno.VSCode.FancyLib/tests/*.test.js",
     "build": "npm run lint && npm run compile && pwsh -NoLogo -NoProfile -File ./Scripts/build.ps1 -ProjectRoot . -BuildOutputDir __BUILD/_staging",
-    "package": "pwsh -NoLogo -NoProfile -File ./Scripts/package-vsix.ps1",
+    "package": "pwsh -NoLogo -NoProfile -File ./Scripts/package.ps1 -BuildOutputDir __BUILD/_staging",
     "vscode:prepublish": "npm run compile"
   },
   "devDependencies": {

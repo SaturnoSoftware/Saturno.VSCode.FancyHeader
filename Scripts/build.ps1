@@ -63,6 +63,22 @@ Copy-Item -Path (Join-Path $ProjectRoot "out") `
 
 $Manifest = Get-Content -LiteralPath (Join-Path $ProjectRoot "package.json") -Raw | ConvertFrom-Json
 
+# Scripts/package.ps1 packages this staged directory directly instead of the
+# live repo tree, so a real runtime dependency (package.json "dependencies",
+# never "devDependencies") has to travel with it - vsce bundles whatever
+# node_modules it finds beside the manifest it packages.
+if ($Manifest.PSObject.Properties.Name -contains "dependencies" -and @($Manifest.dependencies.PSObject.Properties).Count -gt 0) {
+    $StagedNodeModules = Join-Path $BuildOutputDir "node_modules"
+    New-Item -ItemType Directory -Force -Path $StagedNodeModules | Out-Null
+    foreach ($DepName in $Manifest.dependencies.PSObject.Properties.Name) {
+        $SourceDepPath = Join-Path (Join-Path $ProjectRoot "node_modules") $DepName
+        if (-not (Test-Path -LiteralPath $SourceDepPath -PathType Container)) {
+            throw "Runtime dependency '$DepName' is declared in package.json but missing from node_modules. Run npm install."
+        }
+        Copy-Item -LiteralPath $SourceDepPath -Destination (Join-Path $StagedNodeModules $DepName) -Recurse -Force
+    }
+}
+
 if ($Environment -eq "production") {
     $Before = @($Manifest.contributes.commands).Count
     $Manifest.contributes.commands = @(
@@ -103,11 +119,27 @@ if ($Environment -eq "production") {
     Write-Host "==> Stripped $($Before - $After) dev command(s), $StrippedMenuEntries dev menu entry/entries and $($DevSettings.Count) dev setting(s) from the manifest"
 }
 
+# Scripts/package.ps1 packages this staged directory as-is: it never has the
+# TypeScript sources compile scripts here would need (only compiled `out/`
+# survives the copy above), so vsce's own vscode:prepublish lifecycle hook
+# must not exist to run - without this, packaging would fail trying to
+# recompile from a source tree that was never staged.
+if ($Manifest.PSObject.Properties.Name -contains "scripts") {
+    $Manifest.PSObject.Properties.Remove("scripts")
+}
+
 $Manifest | ConvertTo-Json -Depth 32 |
     Set-Content -LiteralPath (Join-Path $BuildOutputDir "package.json") -Encoding utf8
 
 Copy-Item -LiteralPath (Join-Path $ProjectRoot "LICENSE.txt") `
     -Destination $BuildOutputDir -Force
+
+foreach ($DocName in @("README.md", "CHANGELOG.md")) {
+    $DocPath = Join-Path $ProjectRoot $DocName
+    if (Test-Path -LiteralPath $DocPath -PathType Leaf) {
+        Copy-Item -LiteralPath $DocPath -Destination $BuildOutputDir -Force
+    }
+}
 
 ## -----------------------------------------------------------------------------
 if (Test-Path -LiteralPath (Join-Path $ProjectRoot "Resources") -PathType Container) {
