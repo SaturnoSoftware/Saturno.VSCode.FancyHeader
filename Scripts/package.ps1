@@ -31,14 +31,25 @@ $BuildOutputDir = (Resolve-Path -LiteralPath $BuildOutputDir).ProviderPath
 Remove-Item -LiteralPath $PackageOutputDir -Recurse -Force -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Force -Path $PackageOutputDir | Out-Null
 
-$PayloadDir = Join-Path $PackageOutputDir "extension"
+$StagingRoot = Join-Path ([System.IO.Path]::GetTempPath()) "saturno-vsix/$ReleaseName"
+Remove-Item -LiteralPath $StagingRoot -Recurse -Force -ErrorAction SilentlyContinue
+$PayloadDir = Join-Path $StagingRoot "extension"
 New-Item -ItemType Directory -Force -Path $PayloadDir | Out-Null
 
-foreach ($EntryName in @("package.json", "out", "Resources", "node_modules", "README.md", "CHANGELOG.md", "LICENSE.txt")) {
+foreach ($EntryName in @("package.json", "out", "Resources", "README.md", "CHANGELOG.md", "LICENSE.txt")) {
     $SourcePath = Join-Path $BuildOutputDir $EntryName
     if (Test-Path -LiteralPath $SourcePath) {
         Copy-Item -LiteralPath $SourcePath -Destination (Join-Path $PayloadDir $EntryName) -Recurse -Force
     }
+}
+
+# vsce --no-dependencies deliberately ignores a payload-root node_modules
+# directory. Put the production modules under out/node_modules instead: Node
+# resolves them from compiled FancyLib files and vsce includes them as runtime
+# payload, while the package remains an explicit allowlist.
+$StagedRuntimeModules = Join-Path $BuildOutputDir "node_modules"
+if (Test-Path -LiteralPath $StagedRuntimeModules -PathType Container) {
+    Copy-Item -LiteralPath $StagedRuntimeModules -Destination (Join-Path $PayloadDir "out/node_modules") -Recurse -Force
 }
 
 $ManifestPath = Join-Path $PayloadDir "package.json"
@@ -76,7 +87,12 @@ $ExpectedPath = Join-Path $PackageOutputDir $ExpectedName
 
 Push-Location $PayloadDir
 try {
-    & npx --no-install vsce package --no-dependencies --out "$ExpectedPath"
+    # Runtime modules have already been placed under out/node_modules above,
+    # so keep vsce's dependency walker disabled. Its automatic npm walk drops
+    # the staged out/ entrypoint before the archive is validated.
+    $VsceExecutable = Join-Path $ProjectRoot "node_modules/.bin/vsce"
+    if ($IsWindows) { $VsceExecutable += ".cmd" }
+    & $VsceExecutable package --no-dependencies --out "$ExpectedPath"
     if ($LASTEXITCODE -ne 0) { throw "vsce package failed." }
 }
 finally {
@@ -127,7 +143,7 @@ try {
     if ($Entries -notcontains $ArchiveManifestPath -or $Entries -notcontains $ArchiveMainPath) {
         throw "VSIX contract failed: expected $ArchiveManifestPath and $ArchiveMainPath."
     }
-    if ($Entries | Where-Object { $_ -match '^extension/(Sources|Source|tests|Scripts)/' -or $_ -match '\.(ts|map)$' }) {
+    if ($Entries | Where-Object { $_ -match '^extension/(Sources|Source|tests|Scripts)/' -or ($_ -match '\.(ts|map)$' -and $_ -notmatch '^extension/out/node_modules/') }) {
         throw "VSIX contract failed: development source or test files were packaged."
     }
     $ArchiveManifest = $Archive.GetEntry($ArchiveManifestPath)
@@ -140,6 +156,14 @@ try {
     if ($PackagedManifest.PSObject.Properties.Name -contains "devDependencies") {
         throw "VSIX contract failed: packaged manifest must not contain development dependencies."
     }
+    if ($PackagedManifest.PSObject.Properties.Name -contains "dependencies") {
+        foreach ($DependencyName in $PackagedManifest.dependencies.PSObject.Properties.Name) {
+            $DependencyManifestPath = "extension/out/node_modules/$DependencyName/package.json"
+            if ($Entries -notcontains $DependencyManifestPath) {
+                throw "VSIX contract failed: runtime dependency '$DependencyName' is declared but $DependencyManifestPath is absent."
+            }
+        }
+    }
 }
 finally {
     $Archive.Dispose()
@@ -150,6 +174,8 @@ if ($Stray) {
     $Names = ($Stray | ForEach-Object { $_.Name }) -join ", "
     throw "Packaging left non-.vsix files in $PackageOutputDir : $Names."
 }
+
+Remove-Item -LiteralPath $StagingRoot -Recurse -Force
 
 Write-Host ("==> Packaged: {0} ({1} KB)" -f $Vsix.Name, [math]::Round($Vsix.Length / 1KB))
 Write-Host "==> Done"
