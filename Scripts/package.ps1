@@ -12,6 +12,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 $ProjectRoot = (Resolve-Path -LiteralPath $ProjectRoot).ProviderPath
+$PackageOutputDir = [System.IO.Path]::GetFullPath($PackageOutputDir)
 
 Write-Host "==> Packaging: $ReleaseName"
 
@@ -26,6 +27,24 @@ if (-not (Test-Path -LiteralPath $BuildOutputDir -PathType Container)) {
     throw "No staged build output found at $BuildOutputDir. Run the build step first."
 }
 $BuildOutputDir = (Resolve-Path -LiteralPath $BuildOutputDir).ProviderPath
+
+Remove-Item -LiteralPath $PackageOutputDir -Recurse -Force -ErrorAction SilentlyContinue
+New-Item -ItemType Directory -Force -Path $PackageOutputDir | Out-Null
+
+$PayloadDir = Join-Path $PackageOutputDir "extension"
+New-Item -ItemType Directory -Force -Path $PayloadDir | Out-Null
+
+foreach ($EntryName in @("package.json", "out", "Resources", "node_modules", "README.md", "CHANGELOG.md", "LICENSE.txt")) {
+    $SourcePath = Join-Path $BuildOutputDir $EntryName
+    if (Test-Path -LiteralPath $SourcePath) {
+        Copy-Item -LiteralPath $SourcePath -Destination (Join-Path $PayloadDir $EntryName) -Recurse -Force
+    }
+}
+
+$ManifestPath = Join-Path $PayloadDir "package.json"
+$ManifestTransform = 'const fs = require("fs"); const path = process.argv[1]; const manifest = JSON.parse(fs.readFileSync(path, "utf8")); delete manifest.scripts; delete manifest.devDependencies; fs.writeFileSync(path, JSON.stringify(manifest, null, 2) + "\n");'
+& node -e $ManifestTransform $ManifestPath
+if ($LASTEXITCODE -ne 0) { throw "Could not create the production VSIX manifest." }
 
 # The artifact name comes from package.json, and the full file path goes to
 # `--out`.
@@ -48,7 +67,6 @@ $BuildOutputDir = (Resolve-Path -LiteralPath $BuildOutputDir).ProviderPath
 # Two changes remove the whole chain: package outside `out/` so prepublish cannot
 # delete the destination, and pass the full file path so the result does not
 # depend on whether a directory happens to exist.
-$ManifestPath = Join-Path $BuildOutputDir "package.json"
 $Manifest = Get-Content -LiteralPath $ManifestPath -Raw | ConvertFrom-Json
 if (-not $Manifest.name -or -not $Manifest.version) {
     throw "package.json must declare both `name` and `version` to build the .vsix name."
@@ -56,12 +74,9 @@ if (-not $Manifest.name -or -not $Manifest.version) {
 $ExpectedName = "{0}-{1}.vsix" -f $Manifest.name, $Manifest.version
 $ExpectedPath = Join-Path $PackageOutputDir $ExpectedName
 
-Remove-Item -LiteralPath $PackageOutputDir -Recurse -Force -ErrorAction SilentlyContinue
-New-Item -ItemType Directory -Force -Path $PackageOutputDir | Out-Null
-
-Push-Location $BuildOutputDir
+Push-Location $PayloadDir
 try {
-    & npx vsce package --out "$ExpectedPath"
+    & npx --no-install vsce package --no-dependencies --out "$ExpectedPath"
     if ($LASTEXITCODE -ne 0) { throw "vsce package failed." }
 }
 finally {
@@ -101,6 +116,33 @@ if ($Magic[0] -ne 0x50 -or $Magic[1] -ne 0x4B) {
 # exactly that: a .vsix several versions behind package.json.
 if ($Vsix.Name -ne $ExpectedName) {
     throw "Packaged '$($Vsix.Name)' but package.json declares $($Manifest.version)."
+}
+
+Add-Type -AssemblyName System.IO.Compression.FileSystem
+$Archive = [System.IO.Compression.ZipFile]::OpenRead($Vsix.FullName)
+try {
+    $Entries = @($Archive.Entries | ForEach-Object { $_.FullName })
+    $ArchiveManifestPath = "extension/package.json"
+    $ArchiveMainPath = "extension/$($Manifest.main.TrimStart('.', '/'))"
+    if ($Entries -notcontains $ArchiveManifestPath -or $Entries -notcontains $ArchiveMainPath) {
+        throw "VSIX contract failed: expected $ArchiveManifestPath and $ArchiveMainPath."
+    }
+    if ($Entries | Where-Object { $_ -match '^extension/(Sources|Source|tests|Scripts)/' -or $_ -match '\.(ts|map)$' }) {
+        throw "VSIX contract failed: development source or test files were packaged."
+    }
+    $ArchiveManifest = $Archive.GetEntry($ArchiveManifestPath)
+    $Reader = [System.IO.StreamReader]::new($ArchiveManifest.Open())
+    try { $PackagedManifest = $Reader.ReadToEnd() | ConvertFrom-Json }
+    finally { $Reader.Dispose() }
+    if ($PackagedManifest.PSObject.Properties.Name -contains "scripts") {
+        throw "VSIX contract failed: packaged manifest must not contain scripts or vscode:prepublish."
+    }
+    if ($PackagedManifest.PSObject.Properties.Name -contains "devDependencies") {
+        throw "VSIX contract failed: packaged manifest must not contain development dependencies."
+    }
+}
+finally {
+    $Archive.Dispose()
 }
 
 $Stray = @($Produced | Where-Object { $_.Extension -ne ".vsix" })
