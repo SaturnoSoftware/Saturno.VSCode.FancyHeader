@@ -20,12 +20,12 @@ import * as fs from "fs";
 import * as path from "path";
 import * as vscode from "vscode";
 // -----------------------------------------------------------------------------
-import {
-  getActiveEditor,
-  getActiveFilePath,
-  getCommentSyntaxForEditor,
-  showError
-} from "../Libraries/Saturno.VSCode.FancyLib/Source";
+// VSCODEKIT-0021: import from the specific modules, not the FancyLib barrel -
+// the barrel's `export *` also reaches the dev-only Open Bug domain, and a
+// barrel import drags the whole reachable graph into every compile,
+// including a production one, even when only these functions are used.
+import { getActiveEditor, getActiveFilePath, showError } from "../Libraries/Saturno.VSCode.FancyLib/Source/EditorUtils";
+import { getCommentSyntaxForEditor } from "../Libraries/Saturno.VSCode.FancyLib/Source/CommentSyntax";
 
 import {
   DEFAULT_CONFIG,
@@ -50,6 +50,7 @@ import {
   mergeTemplateSources,
   resolveUniqueTemplatePath,
 } from "./templateManagement";
+import { DevHost, DevModule } from "./devHooks";
 
 
 /*
@@ -64,8 +65,35 @@ const CONFIG_SECTION = "saturno-fancy-header";
 * Functions
 */
 
+/**
+ * Loads `Source/dev/` if it was compiled into this build.
+ *
+ * A production build excludes that directory from its tsconfig, so
+ * `out/Source/dev` does not exist and this require throws - the dev
+ * commands are never registered. The production packaging step also strips
+ * them from the manifest, so the function is not installed rather than
+ * merely hidden.
+ */
+/* -------------------------------------------------------------------------- */
+function loadDevModule(): DevModule | null {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    return require("./dev") as DevModule;
+  } catch {
+    return null;
+  }
+}
+
 /* -------------------------------------------------------------------------- */
 export function activate(context: vscode.ExtensionContext): void {
+  const dev = loadDevModule();
+  if (dev) {
+    const host: DevHost = {
+      extensionVersion: (context.extension?.packageJSON?.version as string) ?? "unknown",
+    };
+    dev.registerDevCommands(context, host);
+  }
+
   context.subscriptions.push(
     vscode.commands.registerCommand(
       "saturno-fancy-header.addHeader",

@@ -1,0 +1,8 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "sourceMap": false
+  },
+  "//": "Production build. Source/dev is excluded here, so out/Source/dev never exists and the guarded require in extension.ts finds nothing to load. This is the whole dev/prod mechanism: not a runtime flag, an absent file.",
+  "exclude": ["node_modules", ".vscode-test", "tests", "Source/dev"]
+}

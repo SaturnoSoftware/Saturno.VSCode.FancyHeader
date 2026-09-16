@@ -61,8 +61,21 @@
       {
         "command": "saturno-fancy-header.about",
         "title": "Saturno: About FancyHeader"
+      },
+      {
+        "command": "saturno-fancy-header.dev.reportBug",
+        "title": "Saturno DEV: Report Bug (Open Bug panel)",
+        "category": "Saturno DEV"
       }
     ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "saturno-fancy-header.dev.reportBug",
+          "when": "saturnoFancyHeader.devMode"
+        }
+      ]
+    },
     "configuration": {
       "title": "Saturno FancyHeader",
       "properties": {
