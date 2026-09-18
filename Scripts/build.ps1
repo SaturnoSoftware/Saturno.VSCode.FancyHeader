@@ -20,7 +20,13 @@ param(
     [string]$BuildOutputDir = (Join-Path $ProjectRoot "out/build"),
     [string]$ReleaseName = "vscode-fancy-header",
     [ValidateSet("development", "production")]
-    [string]$Environment = $(if ($env:SATURNO_BUILD_ENVIRONMENT) { $env:SATURNO_BUILD_ENVIRONMENT } else { "development" })
+    [string]$Environment = $(if ($env:SATURNO_BUILD_ENVIRONMENT) { $env:SATURNO_BUILD_ENVIRONMENT } else { "development" }),
+    # PROJECTBUILDER-0049: naming/path concern only - forwarded by spb, logged
+    # here, and consumed by Scripts/package.ps1 to suffix the packaged .vsix.
+    # Does NOT affect what this script compiles or strips; that stays governed
+    # by -Environment above, unchanged.
+    [ValidateSet("development", "rc", "release")]
+    [string]$BuildChannel = "release"
 )
 
 # FANCYHDR-0039: development-only code lives in Source/dev and is excluded
@@ -36,6 +42,7 @@ $ProjectRoot = (Resolve-Path -LiteralPath $ProjectRoot).ProviderPath
 ## -----------------------------------------------------------------------------
 Write-Host "==> Building: $ReleaseName"
 Write-Host "==> Environment: $Environment"
+Write-Host "==> Build channel: $BuildChannel"
 
 Remove-Item -LiteralPath $BuildOutputDir -Recurse -Force -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Force -Path $BuildOutputDir | Out-Null

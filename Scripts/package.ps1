@@ -7,7 +7,12 @@ param(
     # A dedicated subdirectory of __DIST is safe to wipe and leaves the versioned
     # release folders beside it alone.
     [string]$PackageOutputDir = (Join-Path $ProjectRoot "__DIST/vsix"),
-    [string]$ReleaseName = "vscode-fancy-header"
+    [string]$ReleaseName = "vscode-fancy-header",
+    # PROJECTBUILDER-0049: suffixes the packaged .vsix filename so a development
+    # or rc artifact never collides with (or gets mistaken for) the release one
+    # in $PackageOutputDir. Default "release" reproduces today's exact filename.
+    [ValidateSet("development", "rc", "release")]
+    [string]$BuildChannel = "release"
 )
 
 $ErrorActionPreference = "Stop"
@@ -82,7 +87,14 @@ $Manifest = Get-Content -LiteralPath $ManifestPath -Raw | ConvertFrom-Json
 if (-not $Manifest.name -or -not $Manifest.version) {
     throw "package.json must declare both `name` and `version` to build the .vsix name."
 }
-$ExpectedName = "{0}-{1}.vsix" -f $Manifest.name, $Manifest.version
+# PROJECTBUILDER-0049: "release" stays unsuffixed, matching every existing
+# artifact name exactly - only a non-release channel adds a segment.
+$ChannelSuffix = switch ($BuildChannel) {
+    "development" { ".dev" }
+    "rc" { ".rc" }
+    default { "" }
+}
+$ExpectedName = "{0}-{1}{2}.vsix" -f $Manifest.name, $Manifest.version, $ChannelSuffix
 $ExpectedPath = Join-Path $PackageOutputDir $ExpectedName
 
 Push-Location $PayloadDir
