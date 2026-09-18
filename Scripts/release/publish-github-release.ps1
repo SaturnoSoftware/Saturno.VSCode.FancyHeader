@@ -106,4 +106,14 @@ if ($UploadResult.ExitCode -ne 0) {
     throw "gh $($UploadArguments -join ' ') failed: $($UploadResult.Output)"
 }
 
+# `release upload --clobber` only replaces assets - the release's own title stays
+# whatever the first publish set it to, so a repeat channel build silently ships a
+# fresh asset under a stale title (still naming the old build number). Keep them
+# in sync explicitly; a failure here must not undo the asset that already landed.
+$EditArguments = @("release", "edit", $Tag, "--title", $Title)
+$EditResult = Invoke-GhReleaseCommand -Arguments $EditArguments
+if ($EditResult.ExitCode -ne 0) {
+    throw "gh $($EditArguments -join ' ') failed: $($EditResult.Output)"
+}
+
 Write-Host "::endgroup::"
