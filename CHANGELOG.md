@@ -2,6 +2,13 @@
 
 All notable changes to Saturno FancyHeader are documented here.
 
+## 2.3.2 - 2026-09-20
+
+### Changed
+- The About panel was capped at 420px wide, cramping the "More Software" grid. Widened to
+  860px and grew each grid card's minimum width from 150px to 220px so cards get real room
+  instead of the grid packing in as many narrow columns as would technically fit.
+
 ## 2.3.1 - 2026-09-20
 
 ### Fixed

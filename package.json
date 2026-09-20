@@ -13,7 +13,7 @@
   "homepage": "https://github.com/SaturnoSoftware/Saturno.VSCode.FancyHeader#readme",
   "main": "./out/Source/Extension.js",
   "icon": "Resources/images/icon.png",
-  "version": "2.3.1",
+  "version": "2.3.2",
   "build": 30,
   "license": "GPL-3.0-only",
   "engines": {

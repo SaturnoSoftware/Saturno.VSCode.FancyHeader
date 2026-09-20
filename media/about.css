@@ -15,7 +15,7 @@ body {
 }
 
 main {
-  max-width: 420px;
+  max-width: 860px;
   margin: 0 auto;
 }
 
@@ -157,8 +157,8 @@ h2 {
      (docked sidebar-width tab, split editor, floating panel), so the grid
      needs to size itself off real available space, not a guessed
      breakpoint that has to be kept in sync with main's max-width. */
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
 }
 
 .muted {
