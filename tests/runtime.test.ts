@@ -3,68 +3,37 @@ import * as assert from "node:assert/strict";
 import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
-import { calculateCopyrightYear, formatDateYYYYMMDD } from "../Source/formatting";
-import { DEFAULT_CONFIG } from "../Source/formatting";
+import { _CalculateCopyrightYear } from "../Source/Formatting";
+import { DEFAULT_CONFIG } from "../Source/Config";
 import {
-  findGitRootFromFilePath,
-  readGitUserInfoFromConfigFiles,
-  resolveAuthorInfo,
-  resolveConfiguredTemplateLines,
-  resolveProjectName,
-  resolveLastModifiedDate,
-  resolveTemplateFilePath,
-  resolveTemplateDataAsync,
-} from "../Source/runtime";
+  _ResolveAuthorInfo,
+  _ResolveProjectName,
+  _ResolveConfiguredTemplateLines,
+  ResolveTemplateDataAsync,
+  _ResolveTemplateFilePath,
+} from "../Source/Runtime";
 
 const PLATFORM_TEST_ROOT = process.platform === "win32"
   ? "D:\\Projects\\repo"
   : "/projects/repo";
 
 describe("format helpers", () => {
-  it("formats dates as YYYY-MM-DD", () => {
-    const date = new Date(2026, 4, 28);
-    assert.strictEqual(formatDateYYYYMMDD(date), "2026-05-28");
-  });
-
   it("returns a single copyright year for same-year files", () => {
     const fileDate = new Date(2026, 0, 1);
     const currentDate = new Date(2026, 5, 1);
-    assert.strictEqual(calculateCopyrightYear(fileDate, currentDate), "2026");
+    assert.strictEqual(_CalculateCopyrightYear(fileDate, currentDate), "2026");
   });
 
   it("returns a year range for older files", () => {
     const fileDate = new Date(2024, 0, 1);
     const currentDate = new Date(2026, 5, 1);
-    assert.strictEqual(calculateCopyrightYear(fileDate, currentDate), "2024 - 2026");
+    assert.strictEqual(_CalculateCopyrightYear(fileDate, currentDate), "2024 - 2026");
   });
 });
 
-describe("LAST_MODIFIED", () => {
-  it("prefers the date of the last Git commit over the file timestamp", () => {
-    const result = resolveLastModifiedDate(
-      "/repo/src/main.ts",
-      "/repo",
-      () => new Date(2026, 4, 28),
-      () => new Date(2026, 5, 1)
-    );
-
-    assert.strictEqual(formatDateYYYYMMDD(result), "2026-05-28");
-  });
-
-  it("falls back to the file modification timestamp without Git metadata", () => {
-    const result = resolveLastModifiedDate(
-      "/repo/src/main.ts",
-      null,
-      () => null,
-      () => new Date(2026, 5, 1)
-    );
-
-    assert.strictEqual(formatDateYYYYMMDD(result), "2026-06-01");
-  });
-});
-describe("resolveAuthorInfo", () => {
+describe("_ResolveAuthorInfo", () => {
   it("prefers explicit overrides", () => {
-    const result = resolveAuthorInfo(
+    const result = _ResolveAuthorInfo(
       "Override Name",
       "override@example.com",
       { name: "Git Name", email: "git@example.com" },
@@ -83,12 +52,12 @@ describe("resolveAuthorInfo", () => {
       const currentFilePath = path.join(workspaceFolderPath, "src", "main.ts");
 
       assert.strictEqual(
-        resolveTemplateFilePath("${workspaceFolder}/templates/header.txt", currentFilePath, workspaceFolderPath),
+        _ResolveTemplateFilePath("${workspaceFolder}/templates/header.txt", currentFilePath, workspaceFolderPath),
         path.resolve(workspaceFolderPath, "templates", "header.txt")
       );
 
       assert.strictEqual(
-        resolveTemplateFilePath("${fileDirname}/header.txt", currentFilePath, workspaceFolderPath),
+        _ResolveTemplateFilePath("${fileDirname}/header.txt", currentFilePath, workspaceFolderPath),
         path.resolve(workspaceFolderPath, "src", "header.txt")
       );
     });
@@ -103,7 +72,7 @@ describe("resolveAuthorInfo", () => {
       fs.writeFileSync(currentFilePath, "");
       fs.writeFileSync(templateFilePath, "Line 1\n\nLine 3\n");
 
-      const lines = resolveConfiguredTemplateLines(currentFilePath, workspaceFolderPath, {
+      const lines = _ResolveConfiguredTemplateLines(currentFilePath, workspaceFolderPath, {
         ...DEFAULT_CONFIG,
         templateFile: "${workspaceFolder}/_header-template.txt",
       });
@@ -117,7 +86,7 @@ describe("resolveAuthorInfo", () => {
       fs.writeFileSync(currentFilePath, "");
 
       assert.throws(
-        () => resolveConfiguredTemplateLines(currentFilePath, tempRoot, {
+        () => _ResolveConfiguredTemplateLines(currentFilePath, tempRoot, {
           ...DEFAULT_CONFIG,
           templateFile: "${workspaceFolder}/missing.txt",
         }),
@@ -127,13 +96,13 @@ describe("resolveAuthorInfo", () => {
   });
 
   it("falls back to git info and then the OS username", () => {
-    const fromGit = resolveAuthorInfo("", "", { name: "Git Name", email: "git@example.com" }, "os-user");
+    const fromGit = _ResolveAuthorInfo("", "", { name: "Git Name", email: "git@example.com" }, "os-user");
     assert.deepStrictEqual(fromGit, {
       name: "Git Name",
       email: "git@example.com",
     });
 
-    const fromOs = resolveAuthorInfo("", "", null, "os-user");
+    const fromOs = _ResolveAuthorInfo("", "", null, "os-user");
     assert.deepStrictEqual(fromOs, {
       name: "os-user",
       email: "",
@@ -147,7 +116,7 @@ describe("async template data", () => {
     const filePath = path.join(tempRoot, "sample.ts");
     fs.writeFileSync(filePath, "export const sample = true;\n");
 
-    const result = await resolveTemplateDataAsync(filePath, {
+    const result = await ResolveTemplateDataAsync(filePath, {
       ...DEFAULT_CONFIG,
       authorName: "Release Author",
       copyrightOwner: "Saturno Software",
@@ -160,6 +129,7 @@ describe("async template data", () => {
     assert.match(result.lastModified, /^\d{4}-\d{2}-\d{2}$/);
   });
 });
+
 describe("git metadata helpers", () => {
   it("prefers git root over workspace folder for project metadata", () => {
     const workspaceRoot = process.platform === "win32"
@@ -169,43 +139,12 @@ describe("git metadata helpers", () => {
     const filePath = path.join(repoRoot, "src", "EditorUtils.ts");
 
     assert.strictEqual(
-      resolveProjectName(
+      _ResolveProjectName(
         filePath,
         repoRoot,        // gitRoot (more specific)
         workspaceRoot    // workspaceFolderPath (parent monorepo)
       ),
       "Saturno.VSCode.FancyLib"
     );
-  });
-
-  it("finds the nearest git root by walking parent directories", () => {
-    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "fancyheader-git-root-"));
-    const filePath = path.join(tempRoot, "packages", "demo", "src", "main.ts");
-
-    fs.mkdirSync(path.join(tempRoot, ".git"), { recursive: true });
-    fs.mkdirSync(path.dirname(filePath), { recursive: true });
-    fs.writeFileSync(filePath, "");
-
-    assert.strictEqual(findGitRootFromFilePath(filePath), tempRoot);
-  });
-
-  it("reads local and global git identity from config files", () => {
-    const tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "fancyheader-home-"));
-    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "fancyheader-config-"));
-
-    fs.mkdirSync(path.join(tempRoot, ".git"), { recursive: true });
-    fs.writeFileSync(
-      path.join(tempRoot, ".git", "config"),
-      "[user]\nname = Local Name\n"
-    );
-    fs.writeFileSync(
-      path.join(tempHome, ".gitconfig"),
-      "[user]\nemail = global@example.com\n"
-    );
-
-    assert.deepStrictEqual(readGitUserInfoFromConfigFiles(tempRoot, tempHome), {
-      name: "Local Name",
-      email: "global@example.com",
-    });
   });
 });

@@ -7,7 +7,11 @@
  */
 import { describe, it } from "node:test";
 import * as assert from "node:assert/strict";
-import { buildHeader, hasGeneratedHeaderAtDocumentStart, CommentSyntax, HeaderTemplateData } from "../Source/formatting";
+import { BuildHeader, _HasGeneratedHeaderAtDocumentStart } from "../Source/Formatting";
+import { HeaderTemplateData } from "../Source/Config";
+import * as Fancy from "../Libraries/Saturno.VSCode.FancyLib/Source";
+
+type CommentSyntax = Fancy.CommentUtils.CommentSyntax;
 
 const cStyleSyntax: CommentSyntax = {
   singleLineStart: "//",
@@ -46,7 +50,7 @@ function timeCallMicros(fn: () => void, iterations: number): number {
 
 describe("formatting latency (measured)", () => {
   it("buildHeader: median call time is well under one editor frame", () => {
-    const micros = timeCallMicros(() => buildHeader(cStyleSyntax, sampleData), 2000);
+    const micros = timeCallMicros(() => BuildHeader(cStyleSyntax, sampleData), 2000);
     console.log(`  buildHeader: median ${micros.toFixed(2)}us over 2000 calls`);
     // 1000us (1ms) leaves two orders of magnitude below the ~16ms budget of a single 60fps
     // editor frame, and this runs once per save command, not per frame - generous on purpose.
@@ -54,9 +58,9 @@ describe("formatting latency (measured)", () => {
   });
 
   it("hasGeneratedHeaderAtDocumentStart: median call time on a realistic file is well under one editor frame", () => {
-    const header = buildHeader(cStyleSyntax, sampleData);
+    const header = BuildHeader(cStyleSyntax, sampleData);
     const body = header + Array.from({ length: 300 }, (_, i) => `const line${i} = ${i};`).join("\n");
-    const micros = timeCallMicros(() => hasGeneratedHeaderAtDocumentStart(body, cStyleSyntax), 2000);
+    const micros = timeCallMicros(() => _HasGeneratedHeaderAtDocumentStart(body, cStyleSyntax), 2000);
     console.log(`  hasGeneratedHeaderAtDocumentStart (300-line doc): median ${micros.toFixed(2)}us over 2000 calls`);
     assert.ok(micros < 1000, `hasGeneratedHeaderAtDocumentStart median ${micros.toFixed(2)}us exceeds the 1000us guard`);
   });

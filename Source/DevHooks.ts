@@ -8,13 +8,13 @@
 //                          .   '=.__.=' `='      *                           //
 //                                                                            //
 //                                                                            //
-// File      : devHooks.ts                                                    //
+// File      : DevHooks.ts                                                    //
 // Project   : Saturno.VSCode.FancyHeader                                     //
-// Date      : 2026-09-16                                                     //
+// Date      : 2026-09-15                                                     //
 // Copyright : Saturno Software - 2026                                        //
 // Author    : mateusdigital <hello@mateus.digital>                           //
+// License   : GPLv3                                                          //
 // -------------------------------------------------------------------------- //
-// SPDX-License-Identifier: GPL-3.0-only
 
 /**
  * FANCYHDR-0039: the contract between the always-shipped adapter and the

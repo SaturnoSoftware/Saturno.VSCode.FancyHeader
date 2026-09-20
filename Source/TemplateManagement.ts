@@ -8,43 +8,28 @@
 //                          .   '=.__.=' `='      *                           //
 //                                                                            //
 //                                                                            //
-// File      : templateManagement.ts                                          //
+// File      : TemplateManagement.ts                                          //
 // Project   : Saturno.VSCode.FancyHeader                                     //
 // Date      : 2026-09-03                                                     //
 // Copyright : Saturno Software - 2026                                        //
 // Author    : mateusdigital <hello@mateus.digital>                           //
+// License   : GPLv3                                                          //
 // -------------------------------------------------------------------------- //
 
 // -----------------------------------------------------------------------------
 import * as path from "path";
-import { DEFAULT_TEMPLATE_LINES, HeaderConfig, NamedHeaderTemplate, normalizeConfig } from "./formatting";
+// This is the pure core (per platforms/VSCODE-EXTENSION.md): it must not
+// import "vscode", directly or transitively. FileUtils is vscode-free, so it
+// is imported directly rather than through the FancyLib barrel.
+// -----------------------------------------------------------------------------
+import * as FileUtils from "../Libraries/Saturno.VSCode.FancyLib/Source/FileUtils";
+// -----------------------------------------------------------------------------
+import { DEFAULT_TEMPLATE_LINES, HeaderConfig, NamedHeaderTemplate, NormalizeConfig } from "./Config";
 
-/*
-*  Functions
-*/
 
 // -----------------------------------------------------------------------------
-export function slugifyTemplateName(name: string): string {
-  const slug = name
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-
-  return slug || "template";
-}
-
-// -----------------------------------------------------------------------------
-export function buildTemplateFileName(name: string, index?: number): string {
-  const slug = slugifyTemplateName(name);
-  return index && index > 1
-    ? `_header-${slug}-${index}.txt`
-    : `_header-${slug}.txt`;
-}
-
-// -----------------------------------------------------------------------------
-export function getPreferredTemplateDirectory(config: HeaderConfig, defaultRoot: string): string {
-  const normalized = normalizeConfig(config);
+export function GetPreferredTemplateDirectory(config: HeaderConfig, defaultRoot: string): string {
+  const normalized = NormalizeConfig(config);
 
   if (normalized.templates.length > 0) {
     return path.dirname(normalized.templates[0].path);
@@ -57,13 +42,37 @@ export function getPreferredTemplateDirectory(config: HeaderConfig, defaultRoot:
   return defaultRoot;
 }
 
+/*
+*  Functions
+*/
+
 // -----------------------------------------------------------------------------
-export function getTemplateSearchDirectories(config: HeaderConfig, defaultRoot: string): string[] {
-  const normalized = normalizeConfig(config);
+export function _SlugifyTemplateName(name: string): string {
+  const slug = name
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+  return slug || "template";
+}
+
+// -----------------------------------------------------------------------------
+export function BuildTemplateFileName(name: string, index?: number): string {
+  const slug = _SlugifyTemplateName(name);
+  return index && index > 1
+    ? `_header-${slug}-${index}.txt`
+    : `_header-${slug}.txt`;
+}
+
+
+// -----------------------------------------------------------------------------
+export function GetTemplateSearchDirectories(config: HeaderConfig, defaultRoot: string): string[] {
+  const normalized = NormalizeConfig(config);
   const seen = new Set<string>();
   const result: string[] = [];
 
-  const addDirectory = (directoryPath: string | undefined) => {
+  const add_directory = (directoryPath: string | undefined) => {
     if (!directoryPath) {
       return;
     }
@@ -79,38 +88,39 @@ export function getTemplateSearchDirectories(config: HeaderConfig, defaultRoot: 
   };
 
   for (const template of normalized.templates) {
-    addDirectory(path.dirname(template.path));
+    add_directory(path.dirname(template.path));
   }
 
   if (normalized.templateFile) {
-    addDirectory(path.dirname(normalized.templateFile));
+    add_directory(path.dirname(normalized.templateFile));
   }
 
-  addDirectory(defaultRoot);
+  add_directory(defaultRoot);
   return result;
 }
 
 // -----------------------------------------------------------------------------
-export function resolveUniqueTemplatePath(
+export function ResolveUniqueTemplatePath(
   templateName: string,
   config: HeaderConfig,
   defaultRoot: string,
-  exists: (candidatePath: string) => boolean
-): string {
-  const root = getPreferredTemplateDirectory(config, defaultRoot);
+  existsCheck: (candidatePath: string) => boolean = FileUtils.ExistsSync
+): string | null {
+  const root = GetPreferredTemplateDirectory(config, defaultRoot);
 
   for (let index = 1; index < 1000; index++) {
-    const candidate = path.join(root, buildTemplateFileName(templateName, index));
-    if (!exists(candidate)) {
+    const candidate = path.join(root, BuildTemplateFileName(templateName, index));
+
+    if (!existsCheck(candidate)) {
       return candidate;
     }
   }
 
-  throw new Error(`Saturno FancyHeader: failed to resolve a unique template path for "${templateName}".`);
+  return null;
 }
 
 // -----------------------------------------------------------------------------
-export function deriveTemplateNameFromFilePath(filePath: string): string {
+export function DeriveTemplateNameFromFilePath(filePath: string): string {
   const portablePath = filePath.replace(/\\/g, "/");
   const baseName = path.posix.basename(portablePath, path.posix.extname(portablePath));
   const stripped = baseName.replace(/^_?header[-_]?/i, "");
@@ -126,8 +136,8 @@ export function deriveTemplateNameFromFilePath(filePath: string): string {
 }
 
 // -----------------------------------------------------------------------------
-export function getEditableTemplateCandidates(config: HeaderConfig): NamedHeaderTemplate[] {
-  const normalized = normalizeConfig(config);
+export function GetEditableTemplateCandidates(config: HeaderConfig): NamedHeaderTemplate[] {
+  const normalized = NormalizeConfig(config);
 
   if (normalized.templates.length > 0) {
     return normalized.templates;
@@ -146,14 +156,14 @@ export function getEditableTemplateCandidates(config: HeaderConfig): NamedHeader
 }
 
 // -----------------------------------------------------------------------------
-export function mergeTemplateSources(
+export function MergeTemplateSources(
   configuredTemplates: NamedHeaderTemplate[],
   discoveredPaths: string[]
 ): NamedHeaderTemplate[] {
   const seen = new Set<string>();
   const result: NamedHeaderTemplate[] = [];
 
-  const addTemplate = (template: NamedHeaderTemplate) => {
+  const add_template = (template: NamedHeaderTemplate) => {
     const resolved = path.resolve(template.path);
     const key = process.platform === "win32" ? resolved.toLowerCase() : resolved;
 
@@ -169,12 +179,12 @@ export function mergeTemplateSources(
   };
 
   for (const template of configuredTemplates) {
-    addTemplate(template);
+    add_template(template);
   }
 
   for (const discoveredPath of discoveredPaths) {
-    addTemplate({
-      name: deriveTemplateNameFromFilePath(discoveredPath),
+    add_template({
+      name: DeriveTemplateNameFromFilePath(discoveredPath),
       path: discoveredPath,
     });
   }
@@ -183,7 +193,7 @@ export function mergeTemplateSources(
 }
 
 // -----------------------------------------------------------------------------
-export function buildNewTemplateContent(
+export function _BuildNewTemplateContent(
   config: HeaderConfig,
   sourceContents?: string | null
 ): string {
@@ -191,7 +201,7 @@ export function buildNewTemplateContent(
     return sourceContents.replace(/\r/g, "");
   }
 
-  const normalized = normalizeConfig(config);
+  const normalized = NormalizeConfig(config);
   const lines = normalized.templateLines.length > 0
     ? normalized.templateLines
     : DEFAULT_TEMPLATE_LINES;
@@ -200,11 +210,11 @@ export function buildNewTemplateContent(
 }
 
 // -----------------------------------------------------------------------------
-export function buildUpdatedTemplateList(
+export function BuildUpdatedTemplateList(
   config: HeaderConfig,
   newTemplate: NamedHeaderTemplate
 ): NamedHeaderTemplate[] {
-  const normalized = normalizeConfig(config);
+  const normalized = NormalizeConfig(config);
 
   if (normalized.templates.length > 0) {
     return [...normalized.templates, newTemplate];

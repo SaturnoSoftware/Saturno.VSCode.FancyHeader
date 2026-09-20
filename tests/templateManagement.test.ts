@@ -1,20 +1,19 @@
 import { describe, it } from "node:test";
 import * as assert from "node:assert/strict";
 import * as path from "node:path";
-import { DEFAULT_CONFIG } from "../Source/formatting";
+import { DEFAULT_CONFIG } from "../Source/Config";
 import {
-  buildNewTemplateContent,
-  buildTemplateFileName,
-  buildUpdatedTemplateList,
-  deriveTemplateNameFromFilePath,
-  getEditableTemplateCandidates,
-  getPreferredTemplateDirectory,
-  getTemplateSearchDirectories,
-  mergeTemplateSources,
-  resolveUniqueTemplatePath,
-  slugifyTemplateName,
-} from "../Source/templateManagement";
-import { getDefaultUserTemplateRoot } from "../Source/runtime";
+  _BuildNewTemplateContent,
+  BuildTemplateFileName,
+  BuildUpdatedTemplateList,
+  DeriveTemplateNameFromFilePath,
+  GetEditableTemplateCandidates,
+  GetPreferredTemplateDirectory,
+  GetTemplateSearchDirectories,
+  MergeTemplateSources,
+  ResolveUniqueTemplatePath,
+  _SlugifyTemplateName,
+} from "../Source/TemplateManagement";
 
 const TEMPLATES_ROOT = process.platform === "win32"
   ? "D:\\Templates"
@@ -28,17 +27,17 @@ const USER_TEMPLATES_ROOT = process.platform === "win32"
 
 describe("templateManagement", () => {
   it("slugifies template names into stable file-safe ids", () => {
-    assert.strictEqual(slugifyTemplateName("ASCII Galaxy"), "ascii-galaxy");
-    assert.strictEqual(slugifyTemplateName("  !!!  "), "template");
+    assert.strictEqual(_SlugifyTemplateName("ASCII Galaxy"), "ascii-galaxy");
+    assert.strictEqual(_SlugifyTemplateName("  !!!  "), "template");
   });
 
   it("builds template file names", () => {
-    assert.strictEqual(buildTemplateFileName("ASCII Galaxy"), "_header-ascii-galaxy.txt");
-    assert.strictEqual(buildTemplateFileName("ASCII Galaxy", 2), "_header-ascii-galaxy-2.txt");
+    assert.strictEqual(BuildTemplateFileName("ASCII Galaxy"), "_header-ascii-galaxy.txt");
+    assert.strictEqual(BuildTemplateFileName("ASCII Galaxy", 2), "_header-ascii-galaxy-2.txt");
   });
 
   it("chooses the preferred template directory from configured templates first", () => {
-    const result = getPreferredTemplateDirectory(
+    const result = GetPreferredTemplateDirectory(
       {
         ...DEFAULT_CONFIG,
         templates: [{ name: "Default", path: path.join(TEMPLATES_ROOT, "_header-default.txt") }],
@@ -55,7 +54,7 @@ describe("templateManagement", () => {
       path.join(TEMPLATES_ROOT, "_header-ascii-galaxy-2.txt"),
     ]);
 
-    const result = resolveUniqueTemplatePath(
+    const result = ResolveUniqueTemplatePath(
       "ASCII Galaxy",
       DEFAULT_CONFIG,
       TEMPLATES_ROOT,
@@ -66,7 +65,7 @@ describe("templateManagement", () => {
   });
 
   it("builds the template search directories from configured paths plus the default root", () => {
-    const result = getTemplateSearchDirectories(
+    const result = GetTemplateSearchDirectories(
       {
         ...DEFAULT_CONFIG,
         templates: [{ name: "Default", path: path.join(TEMPLATES_ROOT, "_header-default.txt") }],
@@ -83,7 +82,7 @@ describe("templateManagement", () => {
 
   it("returns editable candidates from templates or templateFile fallback", () => {
     assert.deepStrictEqual(
-      getEditableTemplateCandidates({
+      GetEditableTemplateCandidates({
         ...DEFAULT_CONFIG,
         templates: [{ name: "Default", path: path.join(TEMPLATES_ROOT, "_header-default.txt") }],
       }),
@@ -91,7 +90,7 @@ describe("templateManagement", () => {
     );
 
     assert.deepStrictEqual(
-      getEditableTemplateCandidates({
+      GetEditableTemplateCandidates({
         ...DEFAULT_CONFIG,
         templateFile: path.join(TEMPLATES_ROOT, "_header-default.txt"),
       }),
@@ -101,11 +100,11 @@ describe("templateManagement", () => {
 
   it("derives friendly names from discovered template files", () => {
     assert.strictEqual(
-      deriveTemplateNameFromFilePath(path.join(TEMPLATES_ROOT, "_header-ascii-galaxy.txt")),
+      DeriveTemplateNameFromFilePath(path.join(TEMPLATES_ROOT, "_header-ascii-galaxy.txt")),
       "Ascii Galaxy"
     );
     assert.strictEqual(
-      deriveTemplateNameFromFilePath(path.join(TEMPLATES_ROOT, "_header.txt")),
+      DeriveTemplateNameFromFilePath(path.join(TEMPLATES_ROOT, "_header.txt")),
       "Template"
     );
   });
@@ -114,7 +113,7 @@ describe("templateManagement", () => {
     const defaultTemplatePath = path.join(TEMPLATES_ROOT, "_header-default.txt");
     const galaxyTemplatePath = path.join(TEMPLATES_ROOT, "_header-galaxy.txt");
 
-    const result = mergeTemplateSources(
+    const result = MergeTemplateSources(
       [{ name: "Default", path: defaultTemplatePath }],
       [
         defaultTemplatePath,
@@ -130,12 +129,12 @@ describe("templateManagement", () => {
 
   it("builds new template content from an existing template or templateLines fallback", () => {
     assert.strictEqual(
-      buildNewTemplateContent(DEFAULT_CONFIG, "Line 1\r\nLine 2\r\n"),
+      _BuildNewTemplateContent(DEFAULT_CONFIG, "Line 1\r\nLine 2\r\n"),
       "Line 1\nLine 2\n"
     );
 
     assert.strictEqual(
-      buildNewTemplateContent({
+      _BuildNewTemplateContent({
         ...DEFAULT_CONFIG,
         templateLines: ["One", "Two"],
       }),
@@ -144,7 +143,7 @@ describe("templateManagement", () => {
   });
 
   it("builds an updated template list preserving the previous single-template fallback", () => {
-    const result = buildUpdatedTemplateList(
+    const result = BuildUpdatedTemplateList(
       {
         ...DEFAULT_CONFIG,
         templateFile: path.join(TEMPLATES_ROOT, "_header-default.txt"),
@@ -161,18 +160,7 @@ describe("templateManagement", () => {
     ]);
   });
 
-  it("computes the default global template root for common platforms", () => {
-    assert.strictEqual(
-      getDefaultUserTemplateRoot("win32", { APPDATA: "C:\\Users\\Mateus\\AppData\\Roaming" }, "C:\\Users\\Mateus"),
-      "C:\\Users\\Mateus\\AppData\\Roaming\\Code\\User\\saturno-fancy-header"
-    );
-    assert.strictEqual(
-      getDefaultUserTemplateRoot("darwin", {}, "/Users/mateus"),
-      "/Users/mateus/Library/Application Support/Code/User/saturno-fancy-header"
-    );
-    assert.strictEqual(
-      getDefaultUserTemplateRoot("linux", {}, "/home/mateus"),
-      "/home/mateus/.config/Code/User/saturno-fancy-header"
-    );
-  });
+  // Platform handling for the default template root moved with the function
+  // itself to Fancy.FileUtils.GetDefaultUserAppRoot - see
+  // Libraries/Saturno.VSCode.FancyLib/tests/fileUtils.test.ts.
 });

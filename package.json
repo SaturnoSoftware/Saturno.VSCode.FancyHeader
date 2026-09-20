@@ -11,10 +11,10 @@
     "url": "https://github.com/SaturnoSoftware/Saturno.VSCode.FancyHeader/issues"
   },
   "homepage": "https://github.com/SaturnoSoftware/Saturno.VSCode.FancyHeader#readme",
-  "main": "./out/Source/extension.js",
+  "main": "./out/Source/Extension.js",
   "icon": "Resources/images/icon.png",
   "version": "2.2.1",
-  "build": 19,
+  "build": 20,
   "license": "GPL-3.0-only",
   "engines": {
     "vscode": "^1.88.0"

@@ -1,10 +1,10 @@
 import { describe, it } from "node:test";
 import * as assert from "node:assert/strict";
-import { DEFAULT_CONFIG, DEFAULT_TEMPLATE_LINES, normalizeConfig } from "../Source/formatting";
+import { DEFAULT_CONFIG, DEFAULT_TEMPLATE_LINES, NormalizeConfig } from "../Source/Config";
 
-describe("normalizeConfig", () => {
+describe("NormalizeConfig", () => {
   it("keeps valid custom values", () => {
-    const result = normalizeConfig({
+    const result = NormalizeConfig({
       lineWidth: 120,
       fillChar: "=",
       templateLines: ["One", "Two"],
@@ -29,7 +29,7 @@ describe("normalizeConfig", () => {
   });
 
   it("falls back to defaults when values are missing or invalid", () => {
-    const result = normalizeConfig({
+    const result = NormalizeConfig({
       lineWidth: Number.NaN,
       fillChar: "",
       templateLines: [],
@@ -41,7 +41,7 @@ describe("normalizeConfig", () => {
   });
 
   it("clamps line width and takes only the first fill character", () => {
-    const result = normalizeConfig({
+    const result = NormalizeConfig({
       lineWidth: 999,
       fillChar: "==",
     });

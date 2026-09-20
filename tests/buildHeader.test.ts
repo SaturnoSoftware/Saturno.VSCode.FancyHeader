@@ -1,6 +1,10 @@
 import { describe, it } from "node:test";
 import * as assert from "node:assert/strict";
-import { buildHeader, buildHeaderLine, replaceTemplateTokens, hasGeneratedHeaderAtDocumentStart, CommentSyntax, DEFAULT_CONFIG, HeaderTemplateData } from "../Source/formatting";
+import { BuildHeader, _BuildHeaderLine, _ReplaceTemplateTokens, _HasGeneratedHeaderAtDocumentStart } from "../Source/Formatting";
+import { DEFAULT_CONFIG, HeaderTemplateData } from "../Source/Config";
+import * as Fancy from "../Libraries/Saturno.VSCode.FancyLib/Source";
+
+type CommentSyntax = Fancy.CommentUtils.CommentSyntax;
 
 const cStyleSyntax: CommentSyntax = {
   singleLineStart: "//",
@@ -39,7 +43,7 @@ const sampleData: HeaderTemplateData = {
 
 describe("buildHeader", () => {
   it("builds the default C-style header with border and body lines", () => {
-    const result = buildHeader(cStyleSyntax, sampleData, DEFAULT_CONFIG);
+    const result = BuildHeader(cStyleSyntax, sampleData, DEFAULT_CONFIG);
     const lines = result.trimEnd().split("\n");
 
     assert.strictEqual(lines.length, 7);
@@ -55,7 +59,7 @@ describe("buildHeader", () => {
   });
 
   it("supports custom template lines, width, and fill character", () => {
-    const result = buildHeader(cStyleSyntax, sampleData, {
+    const result = BuildHeader(cStyleSyntax, sampleData, {
       ...DEFAULT_CONFIG,
       lineWidth: 60,
       fillChar: "=",
@@ -71,7 +75,7 @@ describe("buildHeader", () => {
   });
 
   it("supports languages that require a closing single-line suffix", () => {
-    const result = buildHeader(htmlStyleSyntax, sampleData, DEFAULT_CONFIG);
+    const result = BuildHeader(htmlStyleSyntax, sampleData, DEFAULT_CONFIG);
     const lines = result.trimEnd().split("\n");
 
     assert.ok(lines[0].startsWith("<!-- "));
@@ -81,7 +85,7 @@ describe("buildHeader", () => {
   });
 
   it("uses at least two comment characters for one-character line comments", () => {
-    const result = buildHeader(hashStyleSyntax, sampleData, DEFAULT_CONFIG);
+    const result = BuildHeader(hashStyleSyntax, sampleData, DEFAULT_CONFIG);
     const lines = result.trimEnd().split("\n");
 
     assert.strictEqual(lines[0].length, 80);
@@ -92,7 +96,7 @@ describe("buildHeader", () => {
   });
 
   it("replaces wrapped placeholder tokens inside template lines", () => {
-    const result = buildHeader(cStyleSyntax, sampleData, {
+    const result = BuildHeader(cStyleSyntax, sampleData, {
       ...DEFAULT_CONFIG,
       templateLines: [
         "  File      : ${FILENAME}",
@@ -110,7 +114,7 @@ describe("buildHeader", () => {
   });
 
   it("preserves ascii-art template lines while closing them on the right side", () => {
-    const result = buildHeader(cStyleSyntax, sampleData, {
+    const result = BuildHeader(cStyleSyntax, sampleData, {
       ...DEFAULT_CONFIG,
       templateLines: [
         "                     *       +",
@@ -129,21 +133,21 @@ describe("buildHeader", () => {
 
 describe("buildHeaderLine", () => {
   it("closes line-comment headers on the right side", () => {
-    const result = buildHeaderLine(cStyleSyntax, "  File      : feature.ts", " ", 80);
+    const result = _BuildHeaderLine(cStyleSyntax, "  File      : feature.ts", " ", 80);
     assert.strictEqual(result.length, 80);
     assert.ok(result.startsWith("// "));
     assert.ok(result.endsWith(" //"));
   });
 
   it("uses the explicit single-line end when available", () => {
-    const result = buildHeaderLine(htmlStyleSyntax, "Title", " ", 60);
+    const result = _BuildHeaderLine(htmlStyleSyntax, "Title", " ", 60);
     assert.strictEqual(result.length, 60);
     assert.ok(result.startsWith("<!-- "));
     assert.ok(result.endsWith(" -->"));
   });
 
   it("duplicates one-character line comment tokens on both sides", () => {
-    const result = buildHeaderLine(hashStyleSyntax, "Title", " ", 60);
+    const result = _BuildHeaderLine(hashStyleSyntax, "Title", " ", 60);
     assert.strictEqual(result.length, 60);
     assert.ok(result.startsWith("## "));
     assert.ok(result.endsWith(" ##"));
@@ -152,7 +156,7 @@ describe("buildHeaderLine", () => {
 
 describe("replaceTemplateTokens", () => {
   it("replaces raw, ${wrapped}, and {{wrapped}} placeholder tokens", () => {
-    const result = replaceTemplateTokens(
+    const result = _ReplaceTemplateTokens(
       "FILENAME | ${PROJECT} | {{DATE}} | LAST_MODIFIED | YEAR | COPYRIGHT_OWNER | USER_NAME | ${USER_EMAIL}",
       sampleData
     );
@@ -164,7 +168,7 @@ describe("replaceTemplateTokens", () => {
   });
 
   it("does not leave ${...} markers behind after replacement", () => {
-    const result = replaceTemplateTokens(
+    const result = _ReplaceTemplateTokens(
       "  File      : ${FILENAME}\n  Project   : ${PROJECT}\n  Author    : ${USER_NAME} <${USER_EMAIL}>",
       sampleData
     );
@@ -176,7 +180,7 @@ describe("replaceTemplateTokens", () => {
   });
 
   it("removes empty email brackets when no user email is available", () => {
-    const result = replaceTemplateTokens(
+    const result = _ReplaceTemplateTokens(
       "  Author    : ${USER_NAME} <${USER_EMAIL}>",
       { ...sampleData, userEmail: "" }
     );
@@ -187,16 +191,16 @@ describe("replaceTemplateTokens", () => {
 
 describe("release header contract", () => {
   it("renders COPYRIGHT_OWNER independently from Author", () => {
-    const result = buildHeader(cStyleSyntax, sampleData, DEFAULT_CONFIG);
+    const result = BuildHeader(cStyleSyntax, sampleData, DEFAULT_CONFIG);
     assert.match(result, /Copyright\s+: 2024 - 2026 Saturno Software/);
     assert.match(result, /Author\s+: Mateus <mateus@saturno\.software>/);
   });
 
   it("recognizes only a complete generated header at the document start", () => {
-    const generated = buildHeader(cStyleSyntax, sampleData, DEFAULT_CONFIG);
-    assert.strictEqual(hasGeneratedHeaderAtDocumentStart(generated + "const value = 1;", cStyleSyntax), true);
-    assert.strictEqual(hasGeneratedHeaderAtDocumentStart("// not a generated header\nconst value = 1;", cStyleSyntax), false);
-    const blockGenerated = buildHeader(htmlStyleSyntax, sampleData, DEFAULT_CONFIG);
-    assert.strictEqual(hasGeneratedHeaderAtDocumentStart(blockGenerated + "<main></main>", htmlStyleSyntax), true);
+    const generated = BuildHeader(cStyleSyntax, sampleData, DEFAULT_CONFIG);
+    assert.strictEqual(_HasGeneratedHeaderAtDocumentStart(generated + "const value = 1;", cStyleSyntax), true);
+    assert.strictEqual(_HasGeneratedHeaderAtDocumentStart("// not a generated header\nconst value = 1;", cStyleSyntax), false);
+    const blockGenerated = BuildHeader(htmlStyleSyntax, sampleData, DEFAULT_CONFIG);
+    assert.strictEqual(_HasGeneratedHeaderAtDocumentStart(blockGenerated + "<main></main>", htmlStyleSyntax), true);
   });
 });

@@ -34,7 +34,7 @@ import {
   reserveReportFile,
   runOpenBugPanel,
 } from '../../Libraries/Saturno.VSCode.FancyLib/Source';
-import { DevHost } from '../devHooks';
+import { DevHost } from '../DevHooks';
 
 const SECTION = 'saturno-fancy-header';
 const GIT_IDENTITY_TIMEOUT_MS = 2000;
