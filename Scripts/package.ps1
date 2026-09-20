@@ -155,7 +155,13 @@ try {
     if ($Entries -notcontains $ArchiveManifestPath -or $Entries -notcontains $ArchiveMainPath) {
         throw "VSIX contract failed: expected $ArchiveManifestPath and $ArchiveMainPath."
     }
-    if ($Entries | Where-Object { $_ -match '^extension/(Sources|Source|tests|Scripts)/' -or ($_ -match '\.(ts|map)$' -and $_ -notmatch '^extension/out/node_modules/') }) {
+    # VSCODEKIT-B0026: this check is release-only on purpose. A development
+    # or rc build's tsconfig legitimately compiles FancyLib's own tests/ tree
+    # and emits .map files - rejecting that here was the reason every prior
+    # "-dev" artifact in the registry was actually built with
+    # -Environment production (the only way to get package.ps1 to succeed),
+    # which meant "-dev" artifacts never contained Source/dev/ at all.
+    if ($BuildChannel -eq "release" -and ($Entries | Where-Object { $_ -match '^extension/(Sources|Source|tests|Scripts)/' -or ($_ -match '\.(ts|map)$' -and $_ -notmatch '^extension/out/node_modules/') })) {
         throw "VSIX contract failed: development source or test files were packaged."
     }
     $ArchiveManifest = $Archive.GetEntry($ArchiveManifestPath)

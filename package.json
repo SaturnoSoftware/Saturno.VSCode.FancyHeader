@@ -14,7 +14,7 @@
   "main": "./out/Source/Extension.js",
   "icon": "Resources/images/icon.png",
   "version": "2.2.1",
-  "build": 20,
+  "build": 21,
   "license": "GPL-3.0-only",
   "engines": {
     "vscode": "^1.88.0"
@@ -183,7 +183,7 @@
         "stagingRoot": "__BUILD/_staging",
         "expectedFiles": [
           "package.json",
-          "out/Source/extension.js"
+          "out/Source/Extension.js"
         ],
         "expectedDirectories": [
           "out/Libraries"
