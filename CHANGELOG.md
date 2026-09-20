@@ -2,6 +2,17 @@
 
 All notable changes to Saturno FancyHeader are documented here.
 
+## 2.3.0 - 2026-09-20
+
+### Added
+- The `Saturno: About FancyHeader` panel now shows a full About page (header card, Saturno
+  Software publisher card, and a "More Software" grid for presskit.diy, Gosh and Fancy
+  Comments), matching the "AltTilda About" mock. A "View Changelog" button opens this file.
+- Three reusable rendering components landed in `Saturno.VSCode.FancyLib`
+  (`About/HeaderCard.ts`, `About/AppCard.ts`, `About/IconButton.ts`, assembled by
+  `About/Page.ts`), so every Fancy extension can build the same About experience from a
+  data model instead of hand-writing HTML per extension.
+
 ## 2.2.4 - 2026-09-20
 
 No functional changes. Dev-channel verification build.
