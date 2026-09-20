@@ -156,14 +156,20 @@ if (Test-Path -LiteralPath (Join-Path $ProjectRoot "Resources") -PathType Contai
         -Force
 }
 
-# The About command reads media/about.html and media/about.css at runtime
-# (Source/About.ts). Without this, the packaged extension has the command
-# registered but the webview HTML it loads was never shipped, and the
-# command fails with a file-not-found error the first time anyone runs it.
-if (Test-Path -LiteralPath (Join-Path $ProjectRoot "media") -PathType Container) {
-    Copy-Item -Path (Join-Path $ProjectRoot "media") `
-        -Destination $BuildOutputDir `
-        -Recurse  `
+# The About command reads Resources/AboutPage/about.html and about.css at
+# runtime (Source/About.ts). Those two files live once in
+# Libraries/Saturno.VSCode.FancyLib/Source/AboutPage/ (checked in there, not
+# here) - every consuming extension stages its own copy under its own
+# Resources/, since a packaged extension can only serve webview resources
+# from paths inside itself. Without this, the command is registered but the
+# HTML it loads was never shipped, and it fails with file-not-found the
+# first time anyone runs it.
+$AboutPageSource = Join-Path $ProjectRoot "Libraries/Saturno.VSCode.FancyLib/Source/AboutPage"
+$AboutPageDest = Join-Path $BuildOutputDir "Resources/AboutPage"
+New-Item -ItemType Directory -Force -Path $AboutPageDest | Out-Null
+foreach ($AssetName in @("about.html", "about.css")) {
+    Copy-Item -LiteralPath (Join-Path $AboutPageSource $AssetName) `
+        -Destination (Join-Path $AboutPageDest $AssetName) `
         -Force
 }
 

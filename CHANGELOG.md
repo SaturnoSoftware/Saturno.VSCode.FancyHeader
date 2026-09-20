@@ -2,6 +2,30 @@
 
 All notable changes to Saturno FancyHeader are documented here.
 
+## 2.4.0 - 2026-09-20
+
+### Changed
+- About panel assets moved from `media/` to `Resources/`: the page template
+  (`Resources/AboutPage/about.html` + `about.css`) is staged from a single shared copy in
+  `Saturno.VSCode.FancyLib` (`Source/AboutPage/`), and the extension's own icon plus every
+  "More Software" product icon now live together under `Resources/icons/`. `Scripts/build.ps1`
+  stages the FancyLib template into `Resources/AboutPage/` on every build.
+  `package.json`'s `"icon"` now points at `Resources/icons/icon.png`.
+- The About panel's one script is now an inline, CSP-nonce'd `<script>` in about.html instead
+  of a separate `media/about.js` file.
+- About panel: `main` narrowed from 860px back to 600px - a middle ground that still gives the
+  "More Software" grid room without the hero/publisher cards stretching too wide.
+- Debug (`F5`) no longer depends on `${defaultBuildTask}` resolving through the npm task
+  provider: `.vscode/tasks.json`'s watch task is now an explicit `shell` task (not `npm`), and
+  `.vscode/launch.json`'s `preLaunchTask` references it by its literal label `"watch"` instead
+  of the variable. Removes a real race where the npm provider's background scan hadn't finished
+  by the time F5 tried to resolve the default build task, which failed with "Couldn't find task
+  ${defaultBuildTask}".
+- Pins `Saturno.VSCode.FancyLib` 1.1.0: the About template consolidates from six TypeScript
+  component files into one `about.html` + one `about.css` + one `RenderAboutPage.ts` (a plain
+  `(template, data) => html` function - FancyLib owns no icons and reads no files itself; the
+  consuming extension resolves every URI and passes a plain JSON data model in).
+
 ## 2.3.2 - 2026-09-20
 
 ### Changed

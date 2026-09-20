@@ -17,6 +17,7 @@
 // -------------------------------------------------------------------------- //
 
 // -----------------------------------------------------------------------------
+import * as crypto from "crypto";
 import * as vscode from "vscode";
 // -----------------------------------------------------------------------------
 import * as Fancy from "../Libraries/Saturno.VSCode.FancyLib/Source";
@@ -42,10 +43,7 @@ export async function ExecuteAboutCommand(context: vscode.ExtensionContext): Pro
     {
       enableFindWidget: false,
       enableScripts: true,
-      localResourceRoots: [
-        vscode.Uri.joinPath(context.extensionUri, "media"),
-        vscode.Uri.joinPath(context.extensionUri, "Resources"),
-      ],
+      localResourceRoots: [vscode.Uri.joinPath(context.extensionUri, "Resources")],
     }
   );
 
@@ -71,89 +69,95 @@ interface AboutPanelModel {
   extensionBuild: string;
 }
 
+/**
+ * about.html/about.css live once in FancyLib (Source/AboutPage/) and ship
+ * staged into every consuming extension's own Resources/AboutPage/ - see
+ * Scripts/build.ps1. Only the extension can resolve a vscode.Uri into a
+ * webview URI, so it (not FancyLib) reads the template text and resolves
+ * every URI the page needs.
+ */
 // -----------------------------------------------------------------------------
 async function _LoadAboutPanelHtml(
   webview: vscode.Webview,
   context: vscode.ExtensionContext,
   model: AboutPanelModel
 ): Promise<string> {
-  const html_uri = vscode.Uri.joinPath(context.extensionUri, "media", "about.html");
-  const style_uri = webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, "media", "about.css"));
-  const script_uri = webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, "media", "about.js"));
-  const html_template = Buffer.from(await vscode.workspace.fs.readFile(html_uri)).toString("utf8");
-
-  const about_body = Fancy.About.RenderAboutPage(
-    _BuildAboutPageModel(webview, context, model)
+  const html_uri = vscode.Uri.joinPath(context.extensionUri, "Resources", "AboutPage", "about.html");
+  const style_uri = webview.asWebviewUri(
+    vscode.Uri.joinPath(context.extensionUri, "Resources", "AboutPage", "about.css")
   );
+  const template_html = Buffer.from(await vscode.workspace.fs.readFile(html_uri)).toString("utf8");
 
-  return html_template
-    .replaceAll("{{cspSource}}", webview.cspSource)
-    .replaceAll("{{styleUri}}", style_uri.toString())
-    .replaceAll("{{scriptUri}}", script_uri.toString())
-    .replaceAll("{{extensionName}}", Fancy.Utils.EscapeHtml(_OrFallback(model.extensionName, "Saturno FancyHeader")))
-    .replaceAll("{{aboutBody}}", about_body);
+  return Fancy.AboutPage.RenderAboutPage(template_html, {
+    cspSource: webview.cspSource,
+    styleUri: style_uri.toString(),
+    extensionName: _OrFallback(model.extensionName, "Saturno FancyHeader"),
+    nonce: crypto.randomBytes(16).toString("base64"),
+    ..._BuildAboutPageData(webview, context, model),
+  });
 }
 
 /**
  * The publisher card links to GitHub and the Saturno Software website only -
- * a deliberately smaller set than the mock's five social icons, since a
- * VS Code About panel is a developer surface, not a marketing one.
+ * a deliberately smaller set than the original AltTilda mock's five social
+ * icons, since a VS Code About panel is a developer surface, not a
+ * marketing one.
  */
 // -----------------------------------------------------------------------------
-function _BuildAboutPageModel(
+function _BuildAboutPageData(
   webview: vscode.Webview,
   context: vscode.ExtensionContext,
   model: AboutPanelModel
-): Fancy.About.AboutPageModel {
+): Omit<Fancy.AboutPage.AboutPageData, "cspSource" | "styleUri" | "extensionName" | "nonce"> {
   const icon_uri = (...segments: string[]) =>
     webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, ...segments)).toString();
 
   return {
-    Header: {
-      IconUri: icon_uri("Resources", "images", "icon.png"),
-      IconAlt: _OrFallback(model.extensionName, "Saturno FancyHeader"),
-      Name: _OrFallback(model.extensionName, "Saturno FancyHeader"),
-      Description: model.extensionDescription,
-      Version: _OrFallback(model.extensionVersion, "unknown"),
-      Build: _OrFallback(model.extensionBuild, "unknown"),
-      Legal: "Copyright 2026 Saturno Software. All rights reserved.",
+    header: {
+      iconUri: icon_uri("Resources", "icons", "icon.png"),
+      iconAlt: _OrFallback(model.extensionName, "Saturno FancyHeader"),
+      name: _OrFallback(model.extensionName, "Saturno FancyHeader"),
+      description: model.extensionDescription,
+      version: _OrFallback(model.extensionVersion, "unknown"),
+      build: _OrFallback(model.extensionBuild, "unknown"),
+      legal: "Copyright 2026 Saturno Software. All rights reserved.",
     },
-    Publisher: {
-      IconUri: icon_uri("media", "icons", "saturno-software.png"),
-      IconAlt: "Saturno Software",
-      Name: "Saturno Software",
-      Description: "Discover Saturno Software solutions",
-      Links: [
-        { Href: "https://github.com/SaturnoSoftware", Label: "GitHub", Glyph: "github" },
-        { Href: "https://saturno.software", Label: "Website", Glyph: "website" },
+    publisher: {
+      iconUri: icon_uri("Resources", "icons", "saturno-software.png"),
+      iconAlt: "Saturno Software",
+      name: "Saturno Software",
+      description: "Discover Saturno Software solutions",
+      links: [
+        { href: "https://github.com/SaturnoSoftware", label: "GitHub", glyph: "github" },
+        { href: "https://saturno.software", label: "Website", glyph: "website" },
       ],
     },
-    MoreSoftware: [
+    moreSoftware: [
       {
-        IconUri: icon_uri("media", "icons", "presskit-diy.png"),
-        IconAlt: "presskit.diy",
-        Name: "presskit.diy",
-        Description: "Amazing presskits in minutes.",
-        Links: [{ Href: "https://github.com/SaturnoSoftware/presskit.diy", Label: "GitHub", Glyph: "github" }],
+        iconUri: icon_uri("Resources", "icons", "presskit-diy.png"),
+        iconAlt: "presskit.diy",
+        name: "presskit.diy",
+        description: "Amazing presskits in minutes.",
+        links: [{ href: "https://github.com/SaturnoSoftware/presskit.diy", label: "GitHub", glyph: "github" }],
       },
       {
-        IconUri: icon_uri("media", "icons", "gosh.webp"),
-        IconAlt: "Gosh",
-        Name: "Gosh",
-        Description: "Bookmarks for your shell.",
-        Links: [{ Href: "https://github.com/SaturnoSoftware/gosh", Label: "GitHub", Glyph: "github" }],
+        iconUri: icon_uri("Resources", "icons", "gosh.webp"),
+        iconAlt: "Gosh",
+        name: "Gosh",
+        description: "Bookmarks for your shell.",
+        links: [{ href: "https://github.com/SaturnoSoftware/gosh", label: "GitHub", glyph: "github" }],
       },
       {
-        IconUri: icon_uri("media", "icons", "fancy-comments.webp"),
-        IconAlt: "Fancy Comments",
-        Name: "Fancy Comments",
-        Description: "Create customized comments without formatting everything manually.",
-        Links: [
-          { Href: "https://github.com/SaturnoSoftware/Saturno.VSCode.FancyComments", Label: "GitHub", Glyph: "github" },
+        iconUri: icon_uri("Resources", "icons", "fancy-comments.webp"),
+        iconAlt: "Fancy Comments",
+        name: "Fancy Comments",
+        description: "Create customized comments without formatting everything manually.",
+        links: [
+          { href: "https://github.com/SaturnoSoftware/Saturno.VSCode.FancyComments", label: "GitHub", glyph: "github" },
         ],
       },
     ],
-    ChangelogButtonLabel: "View Changelog",
+    changelogButtonLabel: "View Changelog",
   };
 }
 

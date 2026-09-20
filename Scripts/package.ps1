@@ -41,7 +41,7 @@ Remove-Item -LiteralPath $StagingRoot -Recurse -Force -ErrorAction SilentlyConti
 $PayloadDir = Join-Path $StagingRoot "extension"
 New-Item -ItemType Directory -Force -Path $PayloadDir | Out-Null
 
-foreach ($EntryName in @("package.json", "out", "Resources", "media", "README.md", "CHANGELOG.md", "LICENSE.txt")) {
+foreach ($EntryName in @("package.json", "out", "Resources", "README.md", "CHANGELOG.md", "LICENSE.txt")) {
     $SourcePath = Join-Path $BuildOutputDir $EntryName
     if (Test-Path -LiteralPath $SourcePath) {
         Copy-Item -LiteralPath $SourcePath -Destination (Join-Path $PayloadDir $EntryName) -Recurse -Force

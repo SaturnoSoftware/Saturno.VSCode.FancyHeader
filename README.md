@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="Resources/images/icon.png" alt="Saturno FancyHeader" width="160">
+    <img src="Resources/icons/icon.png" alt="Saturno FancyHeader" width="160">
 </p>
 
 <p align="center">

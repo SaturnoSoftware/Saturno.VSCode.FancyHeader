@@ -12,10 +12,17 @@ function readRepositoryFile(relativePath: string): string {
 describe("extension packaging assets", () => {
   it("keeps every About-panel resource available to the extension", () => {
     const packageJson = JSON.parse(readRepositoryFile("package.json")) as { icon: string };
-    const aboutHtml = readRepositoryFile("media/about.html");
+    // The template itself lives once in FancyLib; Scripts/build.ps1 stages it
+    // into this extension's own Resources/AboutPage/ - see the AboutPage
+    // comment there for why a copy step is unavoidable.
+    const aboutHtml = readRepositoryFile("Libraries/Saturno.VSCode.FancyLib/Source/AboutPage/about.html");
 
     assert.ok(fs.existsSync(path.join(REPOSITORY_ROOT, packageJson.icon)));
-    assert.ok(fs.existsSync(path.join(REPOSITORY_ROOT, "media/about.css")));
+    assert.ok(fs.existsSync(path.join(REPOSITORY_ROOT, "Libraries/Saturno.VSCode.FancyLib/Source/AboutPage/about.css")));
+    assert.ok(fs.existsSync(path.join(REPOSITORY_ROOT, "Resources/icons/saturno-software.png")));
+    assert.ok(fs.existsSync(path.join(REPOSITORY_ROOT, "Resources/icons/presskit-diy.png")));
+    assert.ok(fs.existsSync(path.join(REPOSITORY_ROOT, "Resources/icons/gosh.webp")));
+    assert.ok(fs.existsSync(path.join(REPOSITORY_ROOT, "Resources/icons/fancy-comments.webp")));
     assert.match(aboutHtml, /Content-Security-Policy/);
     assert.match(aboutHtml, /\{\{cspSource\}\}/);
     assert.match(aboutHtml, /\{\{styleUri\}\}/);
