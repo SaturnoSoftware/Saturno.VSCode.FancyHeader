@@ -13,7 +13,7 @@
   "homepage": "https://github.com/SaturnoSoftware/Saturno.VSCode.FancyHeader#readme",
   "main": "./out/Source/Extension.js",
   "icon": "Resources/images/icon.png",
-  "version": "2.2.2",
+  "version": "2.2.3",
   "build": 26,
   "license": "GPL-3.0-only",
   "engines": {
@@ -183,7 +183,8 @@
         "stagingRoot": "__BUILD/_staging",
         "expectedFiles": [
           "package.json",
-          "out/Source/Extension.js"
+          "out/Source/Extension.js",
+          "media/about.html"
         ],
         "expectedDirectories": [
           "out/Libraries"

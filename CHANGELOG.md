@@ -2,6 +2,15 @@
 
 All notable changes to Saturno FancyHeader are documented here.
 
+## 2.2.3 - 2026-09-20
+
+### Fixed
+- The `Saturno: About FancyHeader` command failed at runtime: `media/about.html` and
+  `media/about.css` (the webview it loads) were never copied into the staged build by
+  `Scripts/build.ps1`, so no packaged `.vsix` - including 2.2.2 - ever shipped them, even
+  though the command itself was correctly registered. `build.ps1` and `package.ps1` now stage
+  and package `media/` alongside `Resources/`.
+
 ## 2.2.2 - 2026-09-20
 
 ### Changed

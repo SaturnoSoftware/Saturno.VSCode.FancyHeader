@@ -156,4 +156,15 @@ if (Test-Path -LiteralPath (Join-Path $ProjectRoot "Resources") -PathType Contai
         -Force
 }
 
+# The About command reads media/about.html and media/about.css at runtime
+# (Source/About.ts). Without this, the packaged extension has the command
+# registered but the webview HTML it loads was never shipped, and the
+# command fails with a file-not-found error the first time anyone runs it.
+if (Test-Path -LiteralPath (Join-Path $ProjectRoot "media") -PathType Container) {
+    Copy-Item -Path (Join-Path $ProjectRoot "media") `
+        -Destination $BuildOutputDir `
+        -Recurse  `
+        -Force
+}
+
 Write-Host "==> Done"
