@@ -2,6 +2,16 @@
 
 All notable changes to Saturno FancyHeader are documented here.
 
+## 2.3.1 - 2026-09-20
+
+### Fixed
+- The "More Software" grid in the About panel broke out of its cards: a grid item defaults to
+  `min-width: auto`, which refuses to shrink below its content's intrinsic width, and the card
+  description text was set to `white-space: nowrap` - together those forced every card wider
+  than its `1fr` track. Cards now get `min-width: 0`, and the grid uses
+  `repeat(auto-fit, minmax(150px, 1fr))` instead of a fixed two-column layout plus a width media
+  query, since a VS Code panel's real width varies far more than a browser tab's.
+
 ## 2.3.0 - 2026-09-20
 
 ### Added

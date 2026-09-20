@@ -78,6 +78,11 @@ main {
   display: flex;
   align-items: center;
   gap: 14px;
+  /* A grid item defaults to min-width: auto, which refuses to shrink below
+     its content's intrinsic width - with .app-card-desc set to nowrap,
+     that forced every "More Software" card wider than its 1fr track and
+     broke the grid. This lets the card actually shrink into its column. */
+  min-width: 0;
 }
 
 .app-card-publisher .app-card-logo {
@@ -147,7 +152,12 @@ h2 {
 
 .grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  /* auto-fit/minmax instead of a fixed "1fr 1fr" + a width media query:
+     a VS Code panel's actual width varies a lot more than a browser tab
+     (docked sidebar-width tab, split editor, floating panel), so the grid
+     needs to size itself off real available space, not a guessed
+     breakpoint that has to be kept in sync with main's max-width. */
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 10px;
 }
 
@@ -184,11 +194,5 @@ button:focus-visible {
 @media (prefers-reduced-motion: reduce) {
   * {
     transition: none !important;
-  }
-}
-
-@media (max-width: 420px) {
-  .grid {
-    grid-template-columns: 1fr;
   }
 }
