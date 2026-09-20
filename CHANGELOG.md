@@ -2,6 +2,10 @@
 
 All notable changes to Saturno FancyHeader are documented here.
 
+## 2.2.4 - 2026-09-20
+
+No functional changes. Dev-channel verification build.
+
 ## 2.2.3 - 2026-09-20
 
 ### Fixed
