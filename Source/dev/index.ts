@@ -33,7 +33,7 @@ import {
   resolveDestinationDirectory,
   reserveReportFile,
   runOpenBugPanel,
-} from '../../Libraries/Saturno.VSCode.FancyLib/Source';
+} from '../../Libraries/Saturno.VSCode.FancyLib/Source/Debug';
 import { DevHost } from '../DevHooks';
 
 const SECTION = 'saturno-fancy-header';
