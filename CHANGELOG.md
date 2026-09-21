@@ -2,6 +2,32 @@
 
 All notable changes to Saturno FancyHeader are documented here.
 
+## 2.4.1 - 2026-09-21
+
+### Fixed
+- The dev-only Open Bug domain compiled into production builds. `Extension.ts`'s single FancyLib
+  barrel import reached `DevBugReport`/`DevBugReportPanel` through the library's
+  `Source/index.ts`, and a static re-export is a static dependency, so the store artifact carried
+  a bug-reporting domain it had no command to invoke. `adc7064` disabled the isolation assertion
+  in `tests/productionBuildIsolation.test.ts` over this rather than weakening it, on the
+  understanding it would be closed later. FancyLib 1.2.0 (`2d3de46`) gives the domain its own
+  entry point, `Source/Debug`, which only `Source/dev/` imports and `tsconfig.prod.json`
+  excludes. The assertion is a real assertion again, and a production package now contains zero
+  `DevBugReport` files (VSCODEKIT-0026).
+- `npm run lint` failed with 72 `@typescript-eslint/naming-convention` errors on `main`, so
+  `npm run build` could not reach its compile step. `adc7064` adopted the Saturno naming model in
+  the source without updating `.eslintrc.json` or the written standard (FANCYHDR-B0010). The
+  lint rule now accepts the model, and
+  `STANDARDS/code-standards/languages/TYPESCRIPT.md` records the 2026-09-21 decision that makes
+  it the standard rather than a local exception.
+
+### Changed
+- Everything that is not this extension's core is now the same file as FancyComments':
+  `tsconfig.json`, `tsconfig.prod.json`, `.gitignore`, `.vscodeignore`, the lint scope and
+  `tests/extensionAssets.test.ts`. That asset test now also asserts the STAGED build output,
+  which is what ships - FancyComments' About assets went missing from every published artifact
+  for weeks while the repository-only version of the same test stayed green.
+
 ## 2.4.0 - 2026-09-20
 
 ### Changed
