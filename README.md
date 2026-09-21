@@ -206,15 +206,6 @@ Template selection follows this order:
 
 ---
 
-## Demos and detailed usage
-
-- [Release demo configuration](./docs/DEMO.md)
-- [Header identity, copyright, and metadata rules](./docs/USAGE.md)
-- [Repository-facing audit](./docs/REPOSITORY-AUDIT.md)
-
----
-
-
 ## License
 
 GPL-3.0 -- See [LICENSE.txt](./LICENSE.txt) for details.
