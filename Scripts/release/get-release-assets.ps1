@@ -6,7 +6,7 @@
 ##  Author    : mateusdigital <hello@mateus.digital>                          ##
 ##----------------------------------------------------------------------------##
 
-# VSCODEKIT-0025: spb's generic fallback (-ReleaseArchivePath, its own zip of
+# spb's generic fallback (-ReleaseArchivePath, its own zip of
 # $Context.ReleaseDistDir) never finds anything, because Scripts/package.ps1
 # never writes an archive there - it writes a .vsix instead. It also does NOT
 # write to its own hardcoded "__DIST/vsix" default: Get-SpbRepoScriptPath

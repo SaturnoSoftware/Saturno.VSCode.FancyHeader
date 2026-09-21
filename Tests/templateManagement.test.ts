@@ -1,9 +1,9 @@
 import { describe, it } from "node:test";
 import * as assert from "node:assert/strict";
 import * as path from "node:path";
-import { DEFAULT_CONFIG } from "../Source/Config";
+import { DEFAULT_CONFIG } from "../Source/Core/Config";
 import {
-  _BuildNewTemplateContent,
+  BuildNewTemplateContent,
   BuildTemplateFileName,
   BuildUpdatedTemplateList,
   DeriveTemplateNameFromFilePath,
@@ -12,8 +12,8 @@ import {
   GetTemplateSearchDirectories,
   MergeTemplateSources,
   ResolveUniqueTemplatePath,
-  _SlugifyTemplateName,
-} from "../Source/TemplateManagement";
+  SlugifyTemplateName,
+} from "../Source/Core/Templates";
 
 const TEMPLATES_ROOT = process.platform === "win32"
   ? "D:\\Templates"
@@ -27,8 +27,8 @@ const USER_TEMPLATES_ROOT = process.platform === "win32"
 
 describe("templateManagement", () => {
   it("slugifies template names into stable file-safe ids", () => {
-    assert.strictEqual(_SlugifyTemplateName("ASCII Galaxy"), "ascii-galaxy");
-    assert.strictEqual(_SlugifyTemplateName("  !!!  "), "template");
+    assert.strictEqual(SlugifyTemplateName("ASCII Galaxy"), "ascii-galaxy");
+    assert.strictEqual(SlugifyTemplateName("  !!!  "), "template");
   });
 
   it("builds template file names", () => {
@@ -129,12 +129,12 @@ describe("templateManagement", () => {
 
   it("builds new template content from an existing template or templateLines fallback", () => {
     assert.strictEqual(
-      _BuildNewTemplateContent(DEFAULT_CONFIG, "Line 1\r\nLine 2\r\n"),
+      BuildNewTemplateContent(DEFAULT_CONFIG, "Line 1\r\nLine 2\r\n"),
       "Line 1\nLine 2\n"
     );
 
     assert.strictEqual(
-      _BuildNewTemplateContent({
+      BuildNewTemplateContent({
         ...DEFAULT_CONFIG,
         templateLines: ["One", "Two"],
       }),

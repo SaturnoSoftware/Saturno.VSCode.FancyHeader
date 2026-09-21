@@ -8,7 +8,7 @@
 //                          .   '=.__.=' `='      *                           //
 //                                                                            //
 //                                                                            //
-// File      : Runtime.ts                                                     //
+// File      : HeaderData.ts                                                  //
 // Project   : Saturno.VSCode.FancyHeader                                     //
 // Date      : 2026-09-03                                                     //
 // Copyright : Saturno Software - 2026                                        //
@@ -26,13 +26,13 @@ import * as path from "path";
 // and ConfigUtils, which do import "vscode" - so these come from their own
 // modules instead of the barrel.
 // -----------------------------------------------------------------------------
-import * as GitUtils from "../Libraries/Saturno.VSCode.FancyLib/Source/GitUtils";
-import * as FileUtils from "../Libraries/Saturno.VSCode.FancyLib/Source/FileUtils";
-import * as DateUtils from "../Libraries/Saturno.VSCode.FancyLib/Source/DateUtils";
-import * as OSUtils from "../Libraries/Saturno.VSCode.FancyLib/Source/OSUtils";
+import * as GitUtils from "../../Libraries/Saturno.VSCode.FancyLib/Source/GitUtils";
+import * as FileUtils from "../../Libraries/Saturno.VSCode.FancyLib/Source/FileUtils";
+import * as DateUtils from "../../Libraries/Saturno.VSCode.FancyLib/Source/DateUtils";
+import * as OSUtils from "../../Libraries/Saturno.VSCode.FancyLib/Source/OSUtils";
 // -----------------------------------------------------------------------------
 import { HeaderConfig, HeaderTemplateData } from "./Config";
-import { _CalculateCopyrightYear } from "./Formatting";
+import { CalculateCopyrightYear } from "./Formatting";
 
 // -----------------------------------------------------------------------------
 export async function ResolveTemplateDataAsync(
@@ -53,7 +53,7 @@ export async function ResolveTemplateDataAsync(
 
   const file_date = initial_date ?? FileUtils.GetFileCreationDate(filePath) ?? new Date();
   const command_user = git_name || git_email ? { name: git_name ?? "", email: git_email ?? "" } : null;
-  const author = _ResolveAuthorInfo(
+  const author = ResolveAuthorInfo(
     config.authorName,
     config.authorEmail,
     command_user ?? GitUtils.ReadGitUserInfoFromConfigFiles(git_root),
@@ -63,10 +63,10 @@ export async function ResolveTemplateDataAsync(
 
   return {
     fileName: path.basename(filePath),
-    projectName: _ResolveProjectName(filePath, git_root, workspaceFolderPath, workspaceFolderName),
+    projectName: ResolveProjectName(filePath, git_root, workspaceFolderPath, workspaceFolderName),
     date: DateUtils.FormatDateYYYYMMDD(file_date),
     lastModified: DateUtils.FormatDateYYYYMMDD(git_root && modified_date ? modified_date : fallback_modified ?? new Date()),
-    copyrightYear: _CalculateCopyrightYear(file_date),
+    copyrightYear: CalculateCopyrightYear(file_date),
     copyrightOwner: config.copyrightOwner.trim() || author.name,
     userName: author.name,
     userEmail: author.email,
@@ -96,7 +96,7 @@ async function _GetFileModificationDateAsync(filePath: string): Promise<Date | n
 //
 
 // -----------------------------------------------------------------------------
-export function _ResolveAuthorInfo(
+export function ResolveAuthorInfo(
   authorNameOverride: string,
   authorEmailOverride: string,
   gitUser: GitUtils.GitUserInfo | null,
@@ -109,7 +109,7 @@ export function _ResolveAuthorInfo(
 }
 
 // -----------------------------------------------------------------------------
-export function _ResolveConfiguredTemplateLines(
+export function ResolveConfiguredTemplateLines(
   currentFilePath: string,
   workspaceFolderPath: string | null,
   config: HeaderConfig
@@ -118,7 +118,7 @@ export function _ResolveConfiguredTemplateLines(
     return config.templateLines;
   }
 
-  const templatePath = _ResolveTemplateFilePath(config.templateFile, currentFilePath, workspaceFolderPath);
+  const templatePath = ResolveTemplateFilePath(config.templateFile, currentFilePath, workspaceFolderPath);
   let contents: string;
 
   try {
@@ -143,7 +143,7 @@ export function _ResolveConfiguredTemplateLines(
 }
 
 // -----------------------------------------------------------------------------
-export function _ResolveTemplateFilePath(
+export function ResolveTemplateFilePath(
   configuredPath: string,
   currentFilePath: string,
   workspaceFolderPath: string | null
@@ -174,7 +174,7 @@ export function _ResolveTemplateFilePath(
 }
 
 // -----------------------------------------------------------------------------
-export function _ResolveProjectName(
+export function ResolveProjectName(
   filePath: string,
   gitRoot: string | null,
   workspaceFolderPath: string | null,

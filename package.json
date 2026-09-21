@@ -13,8 +13,8 @@
   "homepage": "https://github.com/SaturnoSoftware/Saturno.VSCode.FancyHeader#readme",
   "main": "./out/Source/Extension.js",
   "icon": "Resources/icons/icon.png",
-  "version": "2.4.1",
-  "build": 32,
+  "version": "2.5.0",
+  "build": 34,
   "license": "GPL-3.0-only",
   "engines": {
     "vscode": "^1.88.0"
@@ -155,8 +155,8 @@
   "scripts": {
     "compile": "pwsh -NoLogo -NoProfile -Command \"if (Test-Path -LiteralPath ./out) { Remove-Item -LiteralPath ./out -Recurse -Force }\" && tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "lint": "eslint Source Libraries tests --ext ts",
-    "test": "npm run compile && tsc -p tests/tsconfig.json && tsc -p Libraries/Saturno.VSCode.FancyLib/tests/tsconfig.json && node --test out/tests/*.test.js out/Libraries/Saturno.VSCode.FancyLib/tests/*.test.js",
+    "lint": "eslint Source Libraries Tests --ext ts",
+    "test": "npm run compile && tsc -p Tests/tsconfig.json && tsc -p Libraries/Saturno.VSCode.FancyLib/Tests/tsconfig.json && node --test out/Tests/*.test.js Libraries/Saturno.VSCode.FancyLib/out/Tests/*.test.js",
     "build": "npm run lint && npm run compile && pwsh -NoLogo -NoProfile -File ./Scripts/build.ps1 -ProjectRoot . -BuildOutputDir __BUILD/_staging",
     "package": "pwsh -NoLogo -NoProfile -File ./Scripts/package.ps1 -BuildOutputDir __BUILD/_staging",
     "vscode:prepublish": "npm run compile"

@@ -16,34 +16,45 @@
 // License   : GPLv3                                                          //
 // -------------------------------------------------------------------------- //
 
+/**
+ * Turning template lines plus resolved data into the header block.
+ *
+ * Pure string work over an explicit CommentSyntax: which comment tokens to
+ * fence each line with, how wide to pad it, and which tokens to substitute.
+ * Where the data came from is HeaderData.ts's problem.
+ */
+
+// CommentSyntax comes from its own module rather than the FancyLib barrel:
+// the barrel re-exports EditorUtils, which imports "vscode", and Core must
+// stay loadable under plain node --test. Tests/purity.test.ts enforces it.
 // -----------------------------------------------------------------------------
-import * as Fancy from "../Libraries/Saturno.VSCode.FancyLib/Source";
+import { CommentSyntax } from "../../Libraries/Saturno.VSCode.FancyLib/Source/CommentUtils";
 // -----------------------------------------------------------------------------
 import { DEFAULT_CONFIG, HeaderConfig, HeaderTemplateData, NormalizeConfig } from "./Config";
 
-/*
-*  Functions
-*/
+//
+// BUILD
+//
 
 // -----------------------------------------------------------------------------
 export function BuildHeader(
-  syntax: Fancy.CommentUtils.CommentSyntax,
+  syntax: CommentSyntax,
   data: HeaderTemplateData,
   config: HeaderConfig = DEFAULT_CONFIG
 ): string {
   const normalized = NormalizeConfig(config);
-  const edgeLine = _BuildHeaderLine(syntax, "", normalized.fillChar, normalized.lineWidth);
+  const edgeLine = BuildHeaderLine(syntax, "", normalized.fillChar, normalized.lineWidth);
 
   const contentLines = normalized.templateLines.map((line) => {
-    const replaced = _ReplaceTemplateTokens(line, data);
-    return _BuildHeaderLine(syntax, replaced, " ", normalized.lineWidth);
+    const replaced = ReplaceTemplateTokens(line, data);
+    return BuildHeaderLine(syntax, replaced, " ", normalized.lineWidth);
   });
 
   return [edgeLine, ...contentLines, edgeLine].join("\n") + "\n\n";
 }
 
 // -----------------------------------------------------------------------------
-export function _CalculateCopyrightYear(
+export function CalculateCopyrightYear(
   fileDate: Date,
   currentDate: Date = new Date()
 ): string {
@@ -64,8 +75,8 @@ function _NormalizeFenceToken(token: string): string {
 }
 
 // -----------------------------------------------------------------------------
-export function _BuildHeaderLine(
-  syntax: Fancy.CommentUtils.CommentSyntax,
+export function BuildHeaderLine(
+  syntax: CommentSyntax,
   text: string,
   fillChar: string,
   lineWidth: number
@@ -79,7 +90,7 @@ export function _BuildHeaderLine(
 }
 
 // -----------------------------------------------------------------------------
-export function _ReplaceTemplateTokens(line: string, data: HeaderTemplateData): string {
+export function ReplaceTemplateTokens(line: string, data: HeaderTemplateData): string {
   const replacements: Record<string, string> = {
     FILENAME: data.fileName,
     PROJECT: data.projectName,
@@ -107,9 +118,9 @@ export function _ReplaceTemplateTokens(line: string, data: HeaderTemplateData): 
 }
 
 // -----------------------------------------------------------------------------
-export function _HasGeneratedHeaderAtDocumentStart(
+export function HasGeneratedHeaderAtDocumentStart(
   documentText: string,
-  syntax: Fancy.CommentUtils.CommentSyntax,
+  syntax: CommentSyntax,
   config: HeaderConfig = DEFAULT_CONFIG
 ): boolean {
   const lines = documentText.split(/\r?\n/);

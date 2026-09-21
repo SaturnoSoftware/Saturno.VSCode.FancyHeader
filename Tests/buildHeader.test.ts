@@ -1,10 +1,8 @@
 import { describe, it } from "node:test";
 import * as assert from "node:assert/strict";
-import { BuildHeader, _BuildHeaderLine, _ReplaceTemplateTokens, _HasGeneratedHeaderAtDocumentStart } from "../Source/Formatting";
-import { DEFAULT_CONFIG, HeaderTemplateData } from "../Source/Config";
-import * as Fancy from "../Libraries/Saturno.VSCode.FancyLib/Source";
-
-type CommentSyntax = Fancy.CommentUtils.CommentSyntax;
+import { BuildHeader, BuildHeaderLine, ReplaceTemplateTokens, HasGeneratedHeaderAtDocumentStart } from "../Source/Core/Formatting";
+import { DEFAULT_CONFIG, HeaderTemplateData } from "../Source/Core/Config";
+import { CommentSyntax } from "../Libraries/Saturno.VSCode.FancyLib/Source/CommentUtils";
 
 const cStyleSyntax: CommentSyntax = {
   singleLineStart: "//",
@@ -133,21 +131,21 @@ describe("buildHeader", () => {
 
 describe("buildHeaderLine", () => {
   it("closes line-comment headers on the right side", () => {
-    const result = _BuildHeaderLine(cStyleSyntax, "  File      : feature.ts", " ", 80);
+    const result = BuildHeaderLine(cStyleSyntax, "  File      : feature.ts", " ", 80);
     assert.strictEqual(result.length, 80);
     assert.ok(result.startsWith("// "));
     assert.ok(result.endsWith(" //"));
   });
 
   it("uses the explicit single-line end when available", () => {
-    const result = _BuildHeaderLine(htmlStyleSyntax, "Title", " ", 60);
+    const result = BuildHeaderLine(htmlStyleSyntax, "Title", " ", 60);
     assert.strictEqual(result.length, 60);
     assert.ok(result.startsWith("<!-- "));
     assert.ok(result.endsWith(" -->"));
   });
 
   it("duplicates one-character line comment tokens on both sides", () => {
-    const result = _BuildHeaderLine(hashStyleSyntax, "Title", " ", 60);
+    const result = BuildHeaderLine(hashStyleSyntax, "Title", " ", 60);
     assert.strictEqual(result.length, 60);
     assert.ok(result.startsWith("## "));
     assert.ok(result.endsWith(" ##"));
@@ -156,7 +154,7 @@ describe("buildHeaderLine", () => {
 
 describe("replaceTemplateTokens", () => {
   it("replaces raw, ${wrapped}, and {{wrapped}} placeholder tokens", () => {
-    const result = _ReplaceTemplateTokens(
+    const result = ReplaceTemplateTokens(
       "FILENAME | ${PROJECT} | {{DATE}} | LAST_MODIFIED | YEAR | COPYRIGHT_OWNER | USER_NAME | ${USER_EMAIL}",
       sampleData
     );
@@ -168,7 +166,7 @@ describe("replaceTemplateTokens", () => {
   });
 
   it("does not leave ${...} markers behind after replacement", () => {
-    const result = _ReplaceTemplateTokens(
+    const result = ReplaceTemplateTokens(
       "  File      : ${FILENAME}\n  Project   : ${PROJECT}\n  Author    : ${USER_NAME} <${USER_EMAIL}>",
       sampleData
     );
@@ -180,7 +178,7 @@ describe("replaceTemplateTokens", () => {
   });
 
   it("removes empty email brackets when no user email is available", () => {
-    const result = _ReplaceTemplateTokens(
+    const result = ReplaceTemplateTokens(
       "  Author    : ${USER_NAME} <${USER_EMAIL}>",
       { ...sampleData, userEmail: "" }
     );
@@ -198,9 +196,9 @@ describe("release header contract", () => {
 
   it("recognizes only a complete generated header at the document start", () => {
     const generated = BuildHeader(cStyleSyntax, sampleData, DEFAULT_CONFIG);
-    assert.strictEqual(_HasGeneratedHeaderAtDocumentStart(generated + "const value = 1;", cStyleSyntax), true);
-    assert.strictEqual(_HasGeneratedHeaderAtDocumentStart("// not a generated header\nconst value = 1;", cStyleSyntax), false);
+    assert.strictEqual(HasGeneratedHeaderAtDocumentStart(generated + "const value = 1;", cStyleSyntax), true);
+    assert.strictEqual(HasGeneratedHeaderAtDocumentStart("// not a generated header\nconst value = 1;", cStyleSyntax), false);
     const blockGenerated = BuildHeader(htmlStyleSyntax, sampleData, DEFAULT_CONFIG);
-    assert.strictEqual(_HasGeneratedHeaderAtDocumentStart(blockGenerated + "<main></main>", htmlStyleSyntax), true);
+    assert.strictEqual(HasGeneratedHeaderAtDocumentStart(blockGenerated + "<main></main>", htmlStyleSyntax), true);
   });
 });

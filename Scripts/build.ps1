@@ -9,7 +9,7 @@
 ##                                                                            ##
 ##                                                                            ##
 ## File      : build.ps1                                                      ##
-## Project   : Saturno.Fancy.Header                                           ##
+## Project   : Saturno.VSCode.FancyHeader                                     ##
 ## Date      : 2026-08-27                                                     ##
 ## Copyright : Saturno Software - 2026                                        ##
 ## Author    : mateusdigital <hello@mateus.digital>                           ##
@@ -21,15 +21,15 @@ param(
     [string]$ReleaseName = "vscode-fancy-header",
     [ValidateSet("development", "production")]
     [string]$Environment = $(if ($env:SATURNO_BUILD_ENVIRONMENT) { $env:SATURNO_BUILD_ENVIRONMENT } else { "development" }),
-    # PROJECTBUILDER-0049: naming/path concern only - forwarded by spb, logged
-    # here, and consumed by Scripts/package.ps1 to suffix the packaged .vsix.
+    # Naming and path concern only - forwarded by spb, logged here, and
+    # consumed by Scripts/package.ps1 to suffix the packaged .vsix.
     # Does NOT affect what this script compiles or strips; that stays governed
     # by -Environment above, unchanged.
     [ValidateSet("development", "rc", "release")]
     [string]$BuildChannel = "release"
 )
 
-# FANCYHDR-0039: development-only code lives in Source/dev and is excluded
+# Development-only code lives in Source/dev and is excluded
 # from tsconfig.prod.json, so a production build never compiles it. This
 # script does the other half: it strips the dev command and menu entry from
 # the package.json that goes into the package, so the function is not in the
@@ -47,7 +47,8 @@ Write-Host "==> Build channel: $BuildChannel"
 Remove-Item -LiteralPath $BuildOutputDir -Recurse -Force -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Force -Path $BuildOutputDir | Out-Null
 # A production build must never inherit a prior dev compile's output - out/
-# is wiped unconditionally before every compile, dev or prod.
+# is wiped unconditionally before every compile, dev or prod, precisely so
+# neither environment can carry the other's stale artifacts forward.
 Remove-Item -LiteralPath (Join-Path $ProjectRoot "out") -Recurse -Force -ErrorAction SilentlyContinue
 
 $TsConfig = if ($Environment -eq "production") { "./tsconfig.prod.json" } else { "./tsconfig.json" }

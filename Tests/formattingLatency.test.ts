@@ -1,17 +1,15 @@
 /**
- * FANCYHDR-0034: "the target of performance in an editor extension is cost per save, because
+ * The target of performance in an editor extension is cost per save, because
  * that is where the header gets written. Measure, do not estimate." This extension has no
  * automatic save hook (no `onWillSaveTextDocument`) - the hot path is `buildHeader` plus the
  * `hasGeneratedHeaderAtDocumentStart` duplicate check that must run before every insertion
- * (FANCYHDR-0001), both run once per command invocation. That invocation is what gets measured.
+ * both run once per command invocation. That invocation is what gets measured.
  */
 import { describe, it } from "node:test";
 import * as assert from "node:assert/strict";
-import { BuildHeader, _HasGeneratedHeaderAtDocumentStart } from "../Source/Formatting";
-import { HeaderTemplateData } from "../Source/Config";
-import * as Fancy from "../Libraries/Saturno.VSCode.FancyLib/Source";
-
-type CommentSyntax = Fancy.CommentUtils.CommentSyntax;
+import { BuildHeader, HasGeneratedHeaderAtDocumentStart } from "../Source/Core/Formatting";
+import { HeaderTemplateData } from "../Source/Core/Config";
+import { CommentSyntax } from "../Libraries/Saturno.VSCode.FancyLib/Source/CommentUtils";
 
 const cStyleSyntax: CommentSyntax = {
   singleLineStart: "//",
@@ -60,7 +58,7 @@ describe("formatting latency (measured)", () => {
   it("hasGeneratedHeaderAtDocumentStart: median call time on a realistic file is well under one editor frame", () => {
     const header = BuildHeader(cStyleSyntax, sampleData);
     const body = header + Array.from({ length: 300 }, (_, i) => `const line${i} = ${i};`).join("\n");
-    const micros = timeCallMicros(() => _HasGeneratedHeaderAtDocumentStart(body, cStyleSyntax), 2000);
+    const micros = timeCallMicros(() => HasGeneratedHeaderAtDocumentStart(body, cStyleSyntax), 2000);
     console.log(`  hasGeneratedHeaderAtDocumentStart (300-line doc): median ${micros.toFixed(2)}us over 2000 calls`);
     assert.ok(micros < 1000, `hasGeneratedHeaderAtDocumentStart median ${micros.toFixed(2)}us exceeds the 1000us guard`);
   });

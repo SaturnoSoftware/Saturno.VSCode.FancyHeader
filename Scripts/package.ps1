@@ -3,12 +3,12 @@ param(
     [string]$BuildOutputDir = (Join-Path $ProjectRoot "out/build"),
     # NOT under out/: `vscode:prepublish` runs `compile`, which deletes ./out
     # recursively. vsce triggers prepublish itself, so anything this script creates
-    # under out/ is gone by the time vsce writes - see FANCYHDR-0037.
+    # under out/ is gone by the time vsce writes.
     # A dedicated subdirectory of __DIST is safe to wipe and leaves the versioned
     # release folders beside it alone.
     [string]$PackageOutputDir = (Join-Path $ProjectRoot "__DIST/vsix"),
     [string]$ReleaseName = "vscode-fancy-header",
-    # PROJECTBUILDER-0049: suffixes the packaged .vsix filename so a development
+    # Suffixes the packaged .vsix filename so a development
     # or rc artifact never collides with (or gets mistaken for) the release one
     # in $PackageOutputDir. Default "release" reproduces today's exact filename.
     [ValidateSet("development", "rc", "release")]
@@ -65,7 +65,7 @@ if ($LASTEXITCODE -ne 0) { throw "Could not create the production VSIX manifest.
 # The artifact name comes from package.json, and the full file path goes to
 # `--out`.
 #
-# FANCYHDR-0037. The chain, measured on vsce 3.9.1:
+# The chain, measured on vsce 3.9.1:
 #
 #   1. This script created `out/package/` and called
 #      `vsce package --out "out/package/"`.
@@ -87,7 +87,7 @@ $Manifest = Get-Content -LiteralPath $ManifestPath -Raw | ConvertFrom-Json
 if (-not $Manifest.name -or -not $Manifest.version) {
     throw "package.json must declare both `name` and `version` to build the .vsix name."
 }
-# PROJECTBUILDER-0049: "release" stays unsuffixed, matching every existing
+# "release" stays unsuffixed, matching every existing
 # artifact name exactly - only a non-release channel adds a segment.
 $ChannelSuffix = switch ($BuildChannel) {
     "development" { ".dev" }
@@ -113,7 +113,7 @@ finally {
 
 # Verify what was produced, not that something exists.
 #
-# FANCYHDR-0037: the previous guard was
+# The previous guard was
 #     Get-ChildItem -Path $PackageOutputDir -Filter "*.vsix"
 # which silently ignores `-Filter` when the path resolves to a FILE rather than
 # a directory. Once vsce turned the output directory into a file, that guard
@@ -155,13 +155,13 @@ try {
     if ($Entries -notcontains $ArchiveManifestPath -or $Entries -notcontains $ArchiveMainPath) {
         throw "VSIX contract failed: expected $ArchiveManifestPath and $ArchiveMainPath."
     }
-    # VSCODEKIT-B0026: this check is release-only on purpose. A development
+    # This check is release-only on purpose. A development
     # or rc build's tsconfig legitimately compiles FancyLib's own tests/ tree
     # and emits .map files - rejecting that here was the reason every prior
     # "-dev" artifact in the registry was actually built with
     # -Environment production (the only way to get package.ps1 to succeed),
     # which meant "-dev" artifacts never contained Source/dev/ at all.
-    if ($BuildChannel -eq "release" -and ($Entries | Where-Object { $_ -match '^extension/(Sources|Source|tests|Scripts)/' -or ($_ -match '\.(ts|map)$' -and $_ -notmatch '^extension/out/node_modules/') })) {
+    if ($BuildChannel -eq "release" -and ($Entries | Where-Object { $_ -match '^extension/(Sources|Source|[Tt]ests|Scripts)/' -or ($_ -match '\.(ts|map)$' -and $_ -notmatch '^extension/out/node_modules/') })) {
         throw "VSIX contract failed: development source or test files were packaged."
     }
     $ArchiveManifest = $Archive.GetEntry($ArchiveManifestPath)

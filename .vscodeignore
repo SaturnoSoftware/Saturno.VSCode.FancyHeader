@@ -16,10 +16,10 @@ _SATURNO/**
 **/*.ts
 **/tsconfig.json
 Libraries/**
-out/tests/**
-out/Libraries/**/tests/**
+out/Tests/**
+out/Libraries/**/Tests/**
 Saturno.CICD/**
 Scripts/**
 Source/**
-tests/**
+Tests/**
 vsc-extension-quickstart.md

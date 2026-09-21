@@ -17,7 +17,7 @@
 // -------------------------------------------------------------------------- //
 
 // -----------------------------------------------------------------------------
-import * as Utils from "../Libraries/Saturno.VSCode.FancyLib/Source/Utils";
+import * as Utils from "../../Libraries/Saturno.VSCode.FancyLib/Source/Utils";
 
 //
 // Interfaces

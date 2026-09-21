@@ -12,7 +12,7 @@ param(
     [string[]]$AssetPaths = @(),
     [string]$Title = "",
     [switch]$Draft,
-    # PROJECTBUILDER-0050: spb's real -BuildChannel != release marker, forwarded
+    # spb's real -BuildChannel != release marker, forwarded
     # only for a development/rc channel build.
     [switch]$Prerelease,
     [string]$Target = ""
@@ -20,7 +20,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-# VSCODEKIT-0025: this repo's real releases are published manually via
+# This repo's real releases are published manually via
 # `github-repository-admin.py publish-release --confirm-publish`, a deliberate
 # choice - never automatically by spb. This script exists only so
 # `spb package --registry --build-channel development|rc` can share a

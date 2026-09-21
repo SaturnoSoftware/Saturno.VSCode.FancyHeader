@@ -3,15 +3,15 @@ import * as assert from "node:assert/strict";
 import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
-import { _CalculateCopyrightYear } from "../Source/Formatting";
-import { DEFAULT_CONFIG } from "../Source/Config";
+import { CalculateCopyrightYear } from "../Source/Core/Formatting";
+import { DEFAULT_CONFIG } from "../Source/Core/Config";
 import {
-  _ResolveAuthorInfo,
-  _ResolveProjectName,
-  _ResolveConfiguredTemplateLines,
+  ResolveAuthorInfo,
+  ResolveProjectName,
+  ResolveConfiguredTemplateLines,
   ResolveTemplateDataAsync,
-  _ResolveTemplateFilePath,
-} from "../Source/Runtime";
+  ResolveTemplateFilePath,
+} from "../Source/Core/HeaderData";
 
 const PLATFORM_TEST_ROOT = process.platform === "win32"
   ? "D:\\Projects\\repo"
@@ -21,19 +21,19 @@ describe("format helpers", () => {
   it("returns a single copyright year for same-year files", () => {
     const fileDate = new Date(2026, 0, 1);
     const currentDate = new Date(2026, 5, 1);
-    assert.strictEqual(_CalculateCopyrightYear(fileDate, currentDate), "2026");
+    assert.strictEqual(CalculateCopyrightYear(fileDate, currentDate), "2026");
   });
 
   it("returns a year range for older files", () => {
     const fileDate = new Date(2024, 0, 1);
     const currentDate = new Date(2026, 5, 1);
-    assert.strictEqual(_CalculateCopyrightYear(fileDate, currentDate), "2024 - 2026");
+    assert.strictEqual(CalculateCopyrightYear(fileDate, currentDate), "2024 - 2026");
   });
 });
 
-describe("_ResolveAuthorInfo", () => {
+describe("ResolveAuthorInfo", () => {
   it("prefers explicit overrides", () => {
-    const result = _ResolveAuthorInfo(
+    const result = ResolveAuthorInfo(
       "Override Name",
       "override@example.com",
       { name: "Git Name", email: "git@example.com" },
@@ -52,12 +52,12 @@ describe("_ResolveAuthorInfo", () => {
       const currentFilePath = path.join(workspaceFolderPath, "src", "main.ts");
 
       assert.strictEqual(
-        _ResolveTemplateFilePath("${workspaceFolder}/templates/header.txt", currentFilePath, workspaceFolderPath),
+        ResolveTemplateFilePath("${workspaceFolder}/templates/header.txt", currentFilePath, workspaceFolderPath),
         path.resolve(workspaceFolderPath, "templates", "header.txt")
       );
 
       assert.strictEqual(
-        _ResolveTemplateFilePath("${fileDirname}/header.txt", currentFilePath, workspaceFolderPath),
+        ResolveTemplateFilePath("${fileDirname}/header.txt", currentFilePath, workspaceFolderPath),
         path.resolve(workspaceFolderPath, "src", "header.txt")
       );
     });
@@ -72,7 +72,7 @@ describe("_ResolveAuthorInfo", () => {
       fs.writeFileSync(currentFilePath, "");
       fs.writeFileSync(templateFilePath, "Line 1\n\nLine 3\n");
 
-      const lines = _ResolveConfiguredTemplateLines(currentFilePath, workspaceFolderPath, {
+      const lines = ResolveConfiguredTemplateLines(currentFilePath, workspaceFolderPath, {
         ...DEFAULT_CONFIG,
         templateFile: "${workspaceFolder}/_header-template.txt",
       });
@@ -86,7 +86,7 @@ describe("_ResolveAuthorInfo", () => {
       fs.writeFileSync(currentFilePath, "");
 
       assert.throws(
-        () => _ResolveConfiguredTemplateLines(currentFilePath, tempRoot, {
+        () => ResolveConfiguredTemplateLines(currentFilePath, tempRoot, {
           ...DEFAULT_CONFIG,
           templateFile: "${workspaceFolder}/missing.txt",
         }),
@@ -96,13 +96,13 @@ describe("_ResolveAuthorInfo", () => {
   });
 
   it("falls back to git info and then the OS username", () => {
-    const fromGit = _ResolveAuthorInfo("", "", { name: "Git Name", email: "git@example.com" }, "os-user");
+    const fromGit = ResolveAuthorInfo("", "", { name: "Git Name", email: "git@example.com" }, "os-user");
     assert.deepStrictEqual(fromGit, {
       name: "Git Name",
       email: "git@example.com",
     });
 
-    const fromOs = _ResolveAuthorInfo("", "", null, "os-user");
+    const fromOs = ResolveAuthorInfo("", "", null, "os-user");
     assert.deepStrictEqual(fromOs, {
       name: "os-user",
       email: "",
@@ -139,7 +139,7 @@ describe("git metadata helpers", () => {
     const filePath = path.join(repoRoot, "src", "EditorUtils.ts");
 
     assert.strictEqual(
-      _ResolveProjectName(
+      ResolveProjectName(
         filePath,
         repoRoot,        // gitRoot (more specific)
         workspaceRoot    // workspaceFolderPath (parent monorepo)

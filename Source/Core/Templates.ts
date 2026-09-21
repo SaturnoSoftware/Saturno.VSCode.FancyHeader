@@ -8,7 +8,7 @@
 //                          .   '=.__.=' `='      *                           //
 //                                                                            //
 //                                                                            //
-// File      : TemplateManagement.ts                                          //
+// File      : Templates.ts                                                   //
 // Project   : Saturno.VSCode.FancyHeader                                     //
 // Date      : 2026-09-03                                                     //
 // Copyright : Saturno Software - 2026                                        //
@@ -17,14 +17,68 @@
 // -------------------------------------------------------------------------- //
 
 // -----------------------------------------------------------------------------
+import * as fs from "fs";
 import * as path from "path";
 // This is the pure core (per platforms/VSCODE-EXTENSION.md): it must not
 // import "vscode", directly or transitively. FileUtils is vscode-free, so it
 // is imported directly rather than through the FancyLib barrel.
 // -----------------------------------------------------------------------------
-import * as FileUtils from "../Libraries/Saturno.VSCode.FancyLib/Source/FileUtils";
+import * as FileUtils from "../../Libraries/Saturno.VSCode.FancyLib/Source/FileUtils";
 // -----------------------------------------------------------------------------
 import { DEFAULT_TEMPLATE_LINES, HeaderConfig, NamedHeaderTemplate, NormalizeConfig } from "./Config";
+
+//
+// CONSTANTS
+//
+
+/** The file name shape a discovered template has to have to be offered. */
+// -----------------------------------------------------------------------------
+const TEMPLATE_FILE_PATTERN = /^_header-.*\.txt$/i;
+
+//
+// DISCOVERY
+//
+
+/**
+ * Every template the user could pick: the ones named in the settings, plus
+ * the ones found lying in the directories those settings point at.
+ *
+ * Discovery is best-effort by design. A directory named in an old setting
+ * may simply not exist any more, and that is not an error worth interrupting
+ * the command for - it just contributes nothing.
+ */
+// -----------------------------------------------------------------------------
+export function GetAvailableTemplates(
+  config: HeaderConfig,
+  defaultRoot: string
+): NamedHeaderTemplate[] {
+  return MergeTemplateSources(
+    GetEditableTemplateCandidates(config),
+    DiscoverTemplateFiles(GetTemplateSearchDirectories(config, defaultRoot))
+  );
+}
+
+// -----------------------------------------------------------------------------
+export function DiscoverTemplateFiles(directories: string[]): string[] {
+  const discovered: string[] = [];
+
+  for (const directory of directories) {
+    let entries: fs.Dirent[];
+    try {
+      entries = fs.readdirSync(directory, { withFileTypes: true });
+    } catch {
+      continue;
+    }
+
+    for (const entry of entries) {
+      if (entry.isFile() && TEMPLATE_FILE_PATTERN.test(entry.name)) {
+        discovered.push(path.join(directory, entry.name));
+      }
+    }
+  }
+
+  return discovered.sort((a, b) => a.localeCompare(b));
+}
 
 
 // -----------------------------------------------------------------------------
@@ -42,12 +96,12 @@ export function GetPreferredTemplateDirectory(config: HeaderConfig, defaultRoot:
   return defaultRoot;
 }
 
-/*
-*  Functions
-*/
+//
+// NAMING
+//
 
 // -----------------------------------------------------------------------------
-export function _SlugifyTemplateName(name: string): string {
+export function SlugifyTemplateName(name: string): string {
   const slug = name
     .trim()
     .toLowerCase()
@@ -59,7 +113,7 @@ export function _SlugifyTemplateName(name: string): string {
 
 // -----------------------------------------------------------------------------
 export function BuildTemplateFileName(name: string, index?: number): string {
-  const slug = _SlugifyTemplateName(name);
+  const slug = SlugifyTemplateName(name);
   return index && index > 1
     ? `_header-${slug}-${index}.txt`
     : `_header-${slug}.txt`;
@@ -193,7 +247,7 @@ export function MergeTemplateSources(
 }
 
 // -----------------------------------------------------------------------------
-export function _BuildNewTemplateContent(
+export function BuildNewTemplateContent(
   config: HeaderConfig,
   sourceContents?: string | null
 ): string {

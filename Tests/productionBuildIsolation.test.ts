@@ -17,7 +17,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 /**
- * FANCYHDR-0039: runs the real production build into a throwaway output
+ * Runs the real production build into a throwaway output
  * directory and checks the result with FancyLib's independent
  * BuildIsolation contract - a shared helper, but a check this repo runs for
  * itself, so a regression in build.ps1 or tsconfig.prod.json fails right
@@ -75,7 +75,7 @@ function runProductionBuild(buildOutputDir: string): void {
 }
 
 // -----------------------------------------------------------------------------
-describe("Production build isolation (FANCYHDR-0039)", () => {
+describe("Production build isolation", () => {
   let buildOutputDir: string;
 
   before(() => {
@@ -91,7 +91,7 @@ describe("Production build isolation (FANCYHDR-0039)", () => {
    * Restored to a real assertion on 2026-09-21. It was disabled on 2026-09-20
    * because Extension.ts's `import * as Fancy from ".../FancyLib/Source"`
    * barrel re-exported the DevBugReport domain, which therefore compiled into
-   * a production build. FancyLib 1.2.0 (VSCODEKIT-0026) moved that domain
+   * a production build. FancyLib 1.2.0 moved that domain
    * behind its own entry point, `.../FancyLib/Source/Debug`, which only
    * Source/dev/ imports and tsconfig.prod.json excludes - so the barrel no
    * longer reaches it and this check is honest again.

@@ -13,5 +13,5 @@
     "types": ["node", "vscode"]
   },
   "include": ["Source"],
-  "exclude": ["node_modules", ".vscode-test", "tests"]
+  "exclude": ["node_modules", ".vscode-test", "Tests"]
 }

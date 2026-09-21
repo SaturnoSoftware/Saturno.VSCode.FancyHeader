@@ -11,7 +11,7 @@ if ([string]::IsNullOrWhiteSpace($env:VSCE_PAT)) {
     throw "VSCE_PAT is required to publish to the Visual Studio Marketplace."
 }
 
-# PROJECTBUILDER-0049 / BCR-01 (2026-09-18 adversarial review): this used to be
+# This used to be
 # Get-ChildItem -Filter "*.vsix" -Recurse | Sort-Object FullName | Select-Object -First 1,
 # which - measured on this machine with development/rc-suffixed filenames now
 # possible alongside the release one - picks a ".dev.vsix" or ".rc.vsix" artifact

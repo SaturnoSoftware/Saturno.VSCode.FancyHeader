@@ -2,105 +2,105 @@ import { describe, it } from "node:test";
 import * as assert from "node:assert/strict";
 import * as path from "path";
 import {
-  _SlugifyTemplateName,
+  SlugifyTemplateName,
   BuildTemplateFileName,
   DeriveTemplateNameFromFilePath,
-  _BuildNewTemplateContent,
+  BuildNewTemplateContent,
   GetPreferredTemplateDirectory,
   GetTemplateSearchDirectories,
   ResolveUniqueTemplatePath,
   MergeTemplateSources,
   BuildUpdatedTemplateList,
   GetEditableTemplateCandidates,
-} from "../Source/TemplateManagement";
-import { DEFAULT_CONFIG } from "../Source/Config";
+} from "../Source/Core/Templates";
+import { DEFAULT_CONFIG } from "../Source/Core/Config";
 
 describe("slugifyTemplateName - extreme inputs", () => {
   it("handles empty string", () => {
-    const result = _SlugifyTemplateName("");
+    const result = SlugifyTemplateName("");
     assert.strictEqual(result, "template");
   });
 
   it("handles only whitespace", () => {
-    const result = _SlugifyTemplateName("   \t\n  ");
+    const result = SlugifyTemplateName("   \t\n  ");
     assert.strictEqual(result, "template");
   });
 
   it("handles only special characters", () => {
-    const result = _SlugifyTemplateName("!@#$%^&*()");
+    const result = SlugifyTemplateName("!@#$%^&*()");
     assert.strictEqual(result, "template");
   });
 
   it("converts to lowercase", () => {
-    const result = _SlugifyTemplateName("UPPERCASE");
+    const result = SlugifyTemplateName("UPPERCASE");
     assert.strictEqual(result, "uppercase");
   });
 
   it("converts spaces to dashes", () => {
-    const result = _SlugifyTemplateName("Multi Word Name");
+    const result = SlugifyTemplateName("Multi Word Name");
     assert.strictEqual(result, "multi-word-name");
   });
 
   it("converts multiple consecutive spaces to single dash", () => {
-    const result = _SlugifyTemplateName("Too    Many    Spaces");
+    const result = SlugifyTemplateName("Too    Many    Spaces");
     assert.strictEqual(result, "too-many-spaces");
   });
 
   it("strips leading and trailing dashes", () => {
-    const result = _SlugifyTemplateName("-leading-trailing-");
+    const result = SlugifyTemplateName("-leading-trailing-");
     assert.strictEqual(result, "leading-trailing");
   });
 
   it("handles Unicode characters", () => {
-    const result = _SlugifyTemplateName("Ñoño Template 世界");
+    const result = SlugifyTemplateName("Ñoño Template 世界");
     assert.strictEqual(result, "o-o-template");
   });
 
   it("handles emoji", () => {
-    const result = _SlugifyTemplateName("Template 🚀 Name");
+    const result = SlugifyTemplateName("Template 🚀 Name");
     assert.strictEqual(result, "template-name");
   });
 
   it("handles extremely long names", () => {
     const longName = "word-".repeat(1000) + "end";
-    const result = _SlugifyTemplateName(longName);
+    const result = SlugifyTemplateName(longName);
     assert.ok(result.length > 0);
     assert.ok(!result.startsWith("-"));
     assert.ok(!result.endsWith("-"));
   });
 
   it("handles names with dots", () => {
-    const result = _SlugifyTemplateName("file.name.template");
+    const result = SlugifyTemplateName("file.name.template");
     assert.strictEqual(result, "file-name-template");
   });
 
   it("handles names with underscores", () => {
-    const result = _SlugifyTemplateName("snake_case_name");
+    const result = SlugifyTemplateName("snake_case_name");
     assert.strictEqual(result, "snake-case-name");
   });
 
   it("handles mixed special characters", () => {
-    const result = _SlugifyTemplateName("Name!@#With$%Special^&Chars");
+    const result = SlugifyTemplateName("Name!@#With$%Special^&Chars");
     assert.strictEqual(result, "name-with-special-chars");
   });
 
   it("handles numbers correctly", () => {
-    const result = _SlugifyTemplateName("Template 123 Version");
+    const result = SlugifyTemplateName("Template 123 Version");
     assert.strictEqual(result, "template-123-version");
   });
 
   it("handles camelCase", () => {
-    const result = _SlugifyTemplateName("camelCaseTemplateName");
+    const result = SlugifyTemplateName("camelCaseTemplateName");
     assert.strictEqual(result, "camelcasetemplatename");
   });
 
   it("handles PascalCase", () => {
-    const result = _SlugifyTemplateName("PascalCaseTemplateName");
+    const result = SlugifyTemplateName("PascalCaseTemplateName");
     assert.strictEqual(result, "pascalcasetemplatename");
   });
 
   it("handles kebab-case (already slugified)", () => {
-    const result = _SlugifyTemplateName("already-slugified-name");
+    const result = SlugifyTemplateName("already-slugified-name");
     assert.strictEqual(result, "already-slugified-name");
   });
 });
@@ -223,33 +223,33 @@ describe("deriveTemplateNameFromFilePath - edge cases", () => {
 describe("buildNewTemplateContent - edge cases", () => {
   it("returns source contents when provided", () => {
     const source = "Line 1\nLine 2\nLine 3";
-    const result = _BuildNewTemplateContent(DEFAULT_CONFIG, source);
+    const result = BuildNewTemplateContent(DEFAULT_CONFIG, source);
     assert.strictEqual(result, source);
   });
 
   it("strips carriage returns from source", () => {
     const source = "Line 1\r\nLine 2\r\nLine 3";
-    const result = _BuildNewTemplateContent(DEFAULT_CONFIG, source);
+    const result = BuildNewTemplateContent(DEFAULT_CONFIG, source);
     assert.strictEqual(result, "Line 1\nLine 2\nLine 3");
   });
 
   it("handles null source", () => {
-    const result = _BuildNewTemplateContent(DEFAULT_CONFIG, null);
+    const result = BuildNewTemplateContent(DEFAULT_CONFIG, null);
     assert.ok(result.length > 0);
   });
 
   it("handles undefined source", () => {
-    const result = _BuildNewTemplateContent(DEFAULT_CONFIG, undefined);
+    const result = BuildNewTemplateContent(DEFAULT_CONFIG, undefined);
     assert.ok(result.length > 0);
   });
 
   it("handles empty string source", () => {
-    const result = _BuildNewTemplateContent(DEFAULT_CONFIG, "");
+    const result = BuildNewTemplateContent(DEFAULT_CONFIG, "");
     assert.ok(result.length > 0);
   });
 
   it("handles whitespace-only source", () => {
-    const result = _BuildNewTemplateContent(DEFAULT_CONFIG, "   \t\n  ");
+    const result = BuildNewTemplateContent(DEFAULT_CONFIG, "   \t\n  ");
     assert.ok(result.length > 0);
   });
 
@@ -258,7 +258,7 @@ describe("buildNewTemplateContent - edge cases", () => {
       ...DEFAULT_CONFIG,
       templateLines: ["Custom 1", "Custom 2"],
     };
-    const result = _BuildNewTemplateContent(config, null);
+    const result = BuildNewTemplateContent(config, null);
     assert.strictEqual(result, "Custom 1\nCustom 2");
   });
 
@@ -267,13 +267,13 @@ describe("buildNewTemplateContent - edge cases", () => {
       ...DEFAULT_CONFIG,
       templateLines: [],
     };
-    const result = _BuildNewTemplateContent(config, null);
+    const result = BuildNewTemplateContent(config, null);
     assert.ok(result.length > 0);
   });
 
   it("handles source with only newlines (treated as whitespace)", () => {
     const source = "\n\n\n";
-    const result = _BuildNewTemplateContent(DEFAULT_CONFIG, source);
+    const result = BuildNewTemplateContent(DEFAULT_CONFIG, source);
     // Whitespace-only source falls back to default template
     assert.ok(result.length > 0);
     assert.ok(result !== "\n\n\n");
@@ -281,7 +281,7 @@ describe("buildNewTemplateContent - edge cases", () => {
 
   it("handles extremely long source", () => {
     const source = "Line\n".repeat(10000);
-    const result = _BuildNewTemplateContent(DEFAULT_CONFIG, source);
+    const result = BuildNewTemplateContent(DEFAULT_CONFIG, source);
     assert.strictEqual(result, source);
   });
 });

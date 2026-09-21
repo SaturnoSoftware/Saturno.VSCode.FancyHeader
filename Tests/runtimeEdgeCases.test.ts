@@ -4,49 +4,49 @@ import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
 import {
-  _ResolveAuthorInfo,
-  _ResolveProjectName,
-  _ResolveConfiguredTemplateLines,
-  _ResolveTemplateFilePath,
-} from "../Source/Runtime";
-import { DEFAULT_CONFIG } from "../Source/Config";
+  ResolveAuthorInfo,
+  ResolveProjectName,
+  ResolveConfiguredTemplateLines,
+  ResolveTemplateFilePath,
+} from "../Source/Core/HeaderData";
+import { DEFAULT_CONFIG } from "../Source/Core/Config";
 
-describe("_ResolveAuthorInfo - edge cases", () => {
+describe("ResolveAuthorInfo - edge cases", () => {
   it("handles all empty strings", () => {
-    const result = _ResolveAuthorInfo("", "", null, "");
+    const result = ResolveAuthorInfo("", "", null, "");
     assert.strictEqual(result.name, "");
     assert.strictEqual(result.email, "");
   });
 
   it("handles only whitespace in overrides", () => {
-    const result = _ResolveAuthorInfo("   ", "\t\t", null, "fallback");
+    const result = ResolveAuthorInfo("   ", "\t\t", null, "fallback");
     assert.strictEqual(result.name, "fallback");
     assert.strictEqual(result.email, "");
   });
 
   it("handles special characters in author name", () => {
-    const result = _ResolveAuthorInfo("Jöhn Döe 🚀", "", null, "fallback");
+    const result = ResolveAuthorInfo("Jöhn Döe 🚀", "", null, "fallback");
     assert.strictEqual(result.name, "Jöhn Döe 🚀");
   });
 
   it("handles extremely long author name", () => {
     const longName = "X".repeat(10000);
-    const result = _ResolveAuthorInfo(longName, "", null, "fallback");
+    const result = ResolveAuthorInfo(longName, "", null, "fallback");
     assert.strictEqual(result.name, longName);
   });
 
   it("handles email with unusual but valid characters", () => {
-    const result = _ResolveAuthorInfo("", "user+tag@sub.domain.co.uk", null, "");
+    const result = ResolveAuthorInfo("", "user+tag@sub.domain.co.uk", null, "");
     assert.strictEqual(result.email, "user+tag@sub.domain.co.uk");
   });
 
   it("handles malformed email (does not validate)", () => {
-    const result = _ResolveAuthorInfo("", "not-an-email", null, "");
+    const result = ResolveAuthorInfo("", "not-an-email", null, "");
     assert.strictEqual(result.email, "not-an-email");
   });
 
   it("prefers override over git even when git has values", () => {
-    const result = _ResolveAuthorInfo(
+    const result = ResolveAuthorInfo(
       "Override",
       "override@example.com",
       { name: "Git Name", email: "git@example.com" },
@@ -57,7 +57,7 @@ describe("_ResolveAuthorInfo - edge cases", () => {
   });
 
   it("mixes sources: name from git, email from override", () => {
-    const result = _ResolveAuthorInfo(
+    const result = ResolveAuthorInfo(
       "",
       "override@example.com",
       { name: "Git Name", email: "" },
@@ -68,30 +68,30 @@ describe("_ResolveAuthorInfo - edge cases", () => {
   });
 
   it("handles null git info correctly", () => {
-    const result = _ResolveAuthorInfo("", "", null, "fallback");
+    const result = ResolveAuthorInfo("", "", null, "fallback");
     assert.strictEqual(result.name, "fallback");
     assert.strictEqual(result.email, "");
   });
 
   it("handles git info with only name", () => {
-    const result = _ResolveAuthorInfo("", "", { name: "Git Name", email: "" }, "fallback");
+    const result = ResolveAuthorInfo("", "", { name: "Git Name", email: "" }, "fallback");
     assert.strictEqual(result.name, "Git Name");
     assert.strictEqual(result.email, "");
   });
 
   it("handles git info with only email", () => {
-    const result = _ResolveAuthorInfo("", "", { name: "", email: "git@example.com" }, "fallback");
+    const result = ResolveAuthorInfo("", "", { name: "", email: "git@example.com" }, "fallback");
     assert.strictEqual(result.name, "fallback");
     assert.strictEqual(result.email, "git@example.com");
   });
 });
 
-describe("_ResolveProjectName - edge cases", () => {
+describe("ResolveProjectName - edge cases", () => {
   it("returns directory name when no git root or workspace", () => {
     const filePath = process.platform === "win32"
       ? "D:\\random\\path\\file.ts"
       : "/random/path/file.ts";
-    const result = _ResolveProjectName(filePath, null, null);
+    const result = ResolveProjectName(filePath, null, null);
     assert.strictEqual(result, "path");
   });
 
@@ -106,7 +106,7 @@ describe("_ResolveProjectName - edge cases", () => {
       ? "D:\\projects\\monorepo"
       : "/projects/monorepo";
 
-    const result = _ResolveProjectName(filePath, gitRoot, workspace);
+    const result = ResolveProjectName(filePath, gitRoot, workspace);
     assert.strictEqual(result, "app");
   });
 
@@ -115,7 +115,7 @@ describe("_ResolveProjectName - edge cases", () => {
       ? "D:\\projects\\internal-tools"
       : "/projects/internal-tools";
 
-    const result = _ResolveProjectName("", null, workspace, "Saturno Internal Tools");
+    const result = ResolveProjectName("", null, workspace, "Saturno Internal Tools");
     assert.strictEqual(result, "Saturno Internal Tools");
   });
 
@@ -124,7 +124,7 @@ describe("_ResolveProjectName - edge cases", () => {
       ? "D:\\projects\\internal-tools"
       : "/projects/internal-tools";
 
-    const result = _ResolveProjectName("", null, workspace, "   ");
+    const result = ResolveProjectName("", null, workspace, "   ");
     assert.strictEqual(result, "internal-tools");
   });
 
@@ -132,7 +132,7 @@ describe("_ResolveProjectName - edge cases", () => {
     const workspace = process.platform === "win32"
       ? "D:\\projects\\项目名称"
       : "/projects/项目名称";
-    const result = _ResolveProjectName("", null, workspace);
+    const result = ResolveProjectName("", null, workspace);
     assert.strictEqual(result, "项目名称");
   });
 
@@ -140,7 +140,7 @@ describe("_ResolveProjectName - edge cases", () => {
     const workspace = process.platform === "win32"
       ? "D:\\projects\\my awesome project"
       : "/projects/my awesome project";
-    const result = _ResolveProjectName("", null, workspace);
+    const result = ResolveProjectName("", null, workspace);
     assert.strictEqual(result, "my awesome project");
   });
 
@@ -148,7 +148,7 @@ describe("_ResolveProjectName - edge cases", () => {
     const gitRoot = process.platform === "win32"
       ? "D:\\repos\\cool-project"
       : "/repos/cool-project";
-    const result = _ResolveProjectName("", gitRoot, null);
+    const result = ResolveProjectName("", gitRoot, null);
     assert.strictEqual(result, "cool-project");
   });
 
@@ -157,29 +157,29 @@ describe("_ResolveProjectName - edge cases", () => {
     const workspace = process.platform === "win32"
       ? `D:\\${longName}`
       : `/${longName}`;
-    const result = _ResolveProjectName("", null, workspace);
+    const result = ResolveProjectName("", null, workspace);
     assert.strictEqual(result, longName);
   });
 });
 
-describe("_ResolveTemplateFilePath - edge cases", () => {
+describe("ResolveTemplateFilePath - edge cases", () => {
   it("throws on empty path", () => {
     assert.throws(
-      () => _ResolveTemplateFilePath("", "/current/file.ts", "/workspace"),
+      () => ResolveTemplateFilePath("", "/current/file.ts", "/workspace"),
       /empty/
     );
   });
 
   it("throws on whitespace-only path", () => {
     assert.throws(
-      () => _ResolveTemplateFilePath("   \t  ", "/current/file.ts", "/workspace"),
+      () => ResolveTemplateFilePath("   \t  ", "/current/file.ts", "/workspace"),
       /empty/
     );
   });
 
   it("throws when ${workspaceFolder} used without workspace", () => {
     assert.throws(
-      () => _ResolveTemplateFilePath("${workspaceFolder}/template.txt", "/file.ts", null),
+      () => ResolveTemplateFilePath("${workspaceFolder}/template.txt", "/file.ts", null),
       /workspaceFolder.*requires/i
     );
   });
@@ -188,7 +188,7 @@ describe("_ResolveTemplateFilePath - edge cases", () => {
     const workspace = process.platform === "win32"
       ? "D:\\workspace"
       : "/workspace";
-    const result = _ResolveTemplateFilePath("${workspaceFolder}/template.txt", "", workspace);
+    const result = ResolveTemplateFilePath("${workspaceFolder}/template.txt", "", workspace);
     const expected = path.resolve(workspace, "template.txt");
     assert.strictEqual(result, expected);
   });
@@ -197,19 +197,19 @@ describe("_ResolveTemplateFilePath - edge cases", () => {
     const filePath = process.platform === "win32"
       ? "D:\\projects\\src\\main.ts"
       : "/projects/src/main.ts";
-    const result = _ResolveTemplateFilePath("${fileDirname}/header.txt", filePath, null);
+    const result = ResolveTemplateFilePath("${fileDirname}/header.txt", filePath, null);
     const expected = path.resolve(path.dirname(filePath), "header.txt");
     assert.strictEqual(result, expected);
   });
 
   it("resolves ~ to home directory", () => {
-    const result = _ResolveTemplateFilePath("~/templates/header.txt", "/file.ts", null);
+    const result = ResolveTemplateFilePath("~/templates/header.txt", "/file.ts", null);
     const expected = path.join(os.homedir(), "templates", "header.txt");
     assert.strictEqual(result, expected);
   });
 
   it("resolves ~/ to home directory", () => {
-    const result = _ResolveTemplateFilePath("~/templates/header.txt", "/file.ts", null);
+    const result = ResolveTemplateFilePath("~/templates/header.txt", "/file.ts", null);
     assert.ok(result.startsWith(os.homedir()));
   });
 
@@ -219,7 +219,7 @@ describe("_ResolveTemplateFilePath - edge cases", () => {
       : "/workspace";
     const filePath = path.join(workspace, "src", "main.ts");
     const template = "${workspaceFolder}/templates/${fileDirname}/header.txt";
-    const result = _ResolveTemplateFilePath(template, filePath, workspace);
+    const result = ResolveTemplateFilePath(template, filePath, workspace);
     assert.ok(path.isAbsolute(result));
   });
 
@@ -227,7 +227,7 @@ describe("_ResolveTemplateFilePath - edge cases", () => {
     const workspace = process.platform === "win32"
       ? "D:\\my workspace"
       : "/my workspace";
-    const result = _ResolveTemplateFilePath("${workspaceFolder}/my templates/header.txt", "", workspace);
+    const result = ResolveTemplateFilePath("${workspaceFolder}/my templates/header.txt", "", workspace);
     assert.ok(result.includes("my workspace"));
     assert.ok(result.includes("my templates"));
   });
@@ -236,7 +236,7 @@ describe("_ResolveTemplateFilePath - edge cases", () => {
     const workspace = process.platform === "win32"
       ? "D:\\工作区"
       : "/工作区";
-    const result = _ResolveTemplateFilePath("${workspaceFolder}/模板/header.txt", "", workspace);
+    const result = ResolveTemplateFilePath("${workspaceFolder}/模板/header.txt", "", workspace);
     assert.ok(result.includes("工作区"));
   });
 
@@ -244,7 +244,7 @@ describe("_ResolveTemplateFilePath - edge cases", () => {
     const workspace = process.platform === "win32"
       ? "D:\\workspace"
       : "/workspace";
-    const result = _ResolveTemplateFilePath("templates/header.txt", "/file.ts", workspace);
+    const result = ResolveTemplateFilePath("templates/header.txt", "/file.ts", workspace);
     const expected = path.resolve(workspace, "templates", "header.txt");
     assert.strictEqual(result, expected);
   });
@@ -253,7 +253,7 @@ describe("_ResolveTemplateFilePath - edge cases", () => {
     const filePath = process.platform === "win32"
       ? "D:\\projects\\src\\main.ts"
       : "/projects/src/main.ts";
-    const result = _ResolveTemplateFilePath("../templates/header.txt", filePath, null);
+    const result = ResolveTemplateFilePath("../templates/header.txt", filePath, null);
     const expected = path.resolve(path.dirname(filePath), "..", "templates", "header.txt");
     assert.strictEqual(result, expected);
   });
@@ -262,16 +262,16 @@ describe("_ResolveTemplateFilePath - edge cases", () => {
     const absolute = process.platform === "win32"
       ? "D:\\absolute\\path\\template.txt"
       : "/absolute/path/template.txt";
-    const result = _ResolveTemplateFilePath(absolute, "/file.ts", "/workspace");
+    const result = ResolveTemplateFilePath(absolute, "/file.ts", "/workspace");
     assert.strictEqual(result, path.resolve(absolute));
   });
 });
 
-describe("_ResolveConfiguredTemplateLines - error cases", () => {
+describe("ResolveConfiguredTemplateLines - error cases", () => {
   it("throws when template file cannot be read", () => {
     const fakePath = "/this/does/not/exist/template.txt";
     assert.throws(
-      () => _ResolveConfiguredTemplateLines("", null, {
+      () => ResolveConfiguredTemplateLines("", null, {
         ...DEFAULT_CONFIG,
         templateFile: fakePath,
       }),
@@ -285,7 +285,7 @@ describe("_ResolveConfiguredTemplateLines - error cases", () => {
     fs.writeFileSync(templatePath, "");
 
     assert.throws(
-      () => _ResolveConfiguredTemplateLines("", null, {
+      () => ResolveConfiguredTemplateLines("", null, {
         ...DEFAULT_CONFIG,
         templateFile: templatePath,
       }),
@@ -301,7 +301,7 @@ describe("_ResolveConfiguredTemplateLines - error cases", () => {
     fs.writeFileSync(templatePath, "\n\n\n\n");
 
     assert.throws(
-      () => _ResolveConfiguredTemplateLines("", null, {
+      () => ResolveConfiguredTemplateLines("", null, {
         ...DEFAULT_CONFIG,
         templateFile: templatePath,
       }),
@@ -316,7 +316,7 @@ describe("_ResolveConfiguredTemplateLines - error cases", () => {
     const templatePath = path.join(tempRoot, "bom.txt");
     fs.writeFileSync(templatePath, "\uFEFFLine 1\nLine 2");
 
-    const lines = _ResolveConfiguredTemplateLines("", null, {
+    const lines = ResolveConfiguredTemplateLines("", null, {
       ...DEFAULT_CONFIG,
       templateFile: templatePath,
     });
@@ -332,7 +332,7 @@ describe("_ResolveConfiguredTemplateLines - error cases", () => {
     const templatePath = path.join(tempRoot, "crlf.txt");
     fs.writeFileSync(templatePath, "Line 1\r\nLine 2\r\nLine 3");
 
-    const lines = _ResolveConfiguredTemplateLines("", null, {
+    const lines = ResolveConfiguredTemplateLines("", null, {
       ...DEFAULT_CONFIG,
       templateFile: templatePath,
     });
@@ -350,7 +350,7 @@ describe("_ResolveConfiguredTemplateLines - error cases", () => {
       templateLines: ["Custom Line 1", "Custom Line 2"],
     };
 
-    const lines = _ResolveConfiguredTemplateLines("", null, config);
+    const lines = ResolveConfiguredTemplateLines("", null, config);
     assert.deepStrictEqual(lines, ["Custom Line 1", "Custom Line 2"]);
   });
 });

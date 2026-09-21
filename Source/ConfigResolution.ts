@@ -16,11 +16,19 @@
 // License   : GPLv3                                                          //
 // -------------------------------------------------------------------------- //
 
+/**
+ * The one place that reads settings out of the editor.
+ *
+ * What it returns has already been through Core/Config.ts, so no caller has
+ * to wonder whether a value came from the validated settings UI or from a
+ * hand-edited settings.json.
+ */
+
 // -----------------------------------------------------------------------------
 import * as vscode from "vscode";
 // -----------------------------------------------------------------------------
 import { CONFIG_SECTION } from "./Constants";
-import { DEFAULT_CONFIG, HeaderConfig, NamedHeaderTemplate, NormalizeConfig } from "./Config";
+import { DEFAULT_CONFIG, HeaderConfig, NamedHeaderTemplate, NormalizeConfig } from "./Core/Config";
 
 // -----------------------------------------------------------------------------
 export function GetConfig(): HeaderConfig {
