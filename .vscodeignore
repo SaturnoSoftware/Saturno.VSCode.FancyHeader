@@ -19,8 +19,6 @@ Libraries/**
 out/tests/**
 out/Libraries/**/tests/**
 Saturno.CICD/**
-Saturno.VSCodeFancyHeader.Internal/**
-Saturno.VSCodeFancyHeader.Interval/**
 Scripts/**
 Source/**
 tests/**
