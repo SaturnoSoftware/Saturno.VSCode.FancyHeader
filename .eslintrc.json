@@ -5,7 +5,9 @@
     "ecmaVersion": 2022,
     "sourceType": "module"
   },
-  "plugins": ["@typescript-eslint"],
+  "plugins": [
+    "@typescript-eslint"
+  ],
   "extends": [
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended"
@@ -13,17 +15,82 @@
   "rules": {
     "@typescript-eslint/no-explicit-any": "off",
     "no-unused-vars": "off",
-    "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
-    "@typescript-eslint/naming-convention": ["error",
-      { "selector": "default",            "format": ["camelCase"] },
-      { "selector": "variable",           "format": ["camelCase", "UPPER_CASE"] },
-      { "selector": "typeLike",           "format": ["PascalCase"] },
-      { "selector": "enumMember",         "format": ["UPPER_CASE"] },
-      { "selector": "import",             "format": null },
-      { "selector": "objectLiteralProperty", "format": null },
-      { "selector": "parameter",          "format": ["camelCase"], "leadingUnderscore": "allow" },
-      { "selector": "parameter", "modifiers": ["unused"], "format": null }
+    "@typescript-eslint/no-unused-vars": [
+      "warn",
+      {
+        "argsIgnorePattern": "^_"
+      }
+    ],
+    "@typescript-eslint/naming-convention": [
+      "error",
+      {
+        "selector": "default",
+        "format": [
+          "camelCase",
+          "PascalCase"
+        ],
+        "leadingUnderscore": "allow"
+      },
+      {
+        "selector": "variable",
+        "format": [
+          "camelCase",
+          "PascalCase",
+          "snake_case",
+          "UPPER_CASE"
+        ],
+        "leadingUnderscore": "allow"
+      },
+      {
+        "selector": "function",
+        "format": [
+          "camelCase",
+          "PascalCase"
+        ],
+        "leadingUnderscore": "allow"
+      },
+      {
+        "selector": "typeLike",
+        "format": [
+          "PascalCase"
+        ]
+      },
+      {
+        "selector": "enumMember",
+        "format": [
+          "UPPER_CASE"
+        ]
+      },
+      {
+        "selector": "import",
+        "format": null
+      },
+      {
+        "selector": "objectLiteralProperty",
+        "format": null
+      },
+      {
+        "selector": "typeProperty",
+        "format": null
+      },
+      {
+        "selector": "parameter",
+        "format": [
+          "camelCase"
+        ],
+        "leadingUnderscore": "allow"
+      },
+      {
+        "selector": "parameter",
+        "modifiers": [
+          "unused"
+        ],
+        "format": null
+      }
     ]
   },
-  "ignorePatterns": ["out", "node_modules"]
+  "ignorePatterns": [
+    "out",
+    "node_modules"
+  ]
 }
