@@ -22,6 +22,17 @@ Maintained by [Saturno.Software](https://saturno.software/).
 
 ---
 
+## Features
+
+- **Language-Aware** -- Uses the active VS Code language comment syntax automatically
+- **Metadata-Driven** -- Inserts file name, project name, date, and author information
+- **Template-Based** -- Supports inline template lines, external template files, and named template pickers
+- **Command Palette Friendly** -- Create, edit, and apply templates without leaving the editor
+- **Cross-Platform** -- Works on Windows, macOS, and Linux with platform-correct template paths
+- **Zero Config** -- Works out of the box with sensible defaults
+
+---
+
 ## Quick Start
 
 ### Install from Marketplace or VSIX
@@ -58,17 +69,6 @@ Optional template commands:
 //   Author    : Mateus <mateus@saturno.software>
 // ------------------------------------------------------------------------------
 ```
-
----
-
-## Features
-
-- **Language-Aware** -- Uses the active VS Code language comment syntax automatically
-- **Metadata-Driven** -- Inserts file name, project name, date, and author information
-- **Template-Based** -- Supports inline template lines, external template files, and named template pickers
-- **Command Palette Friendly** -- Create, edit, and apply templates without leaving the editor
-- **Cross-Platform** -- Works on Windows, macOS, and Linux with platform-correct template paths
-- **Zero Config** -- Works out of the box with sensible defaults
 
 ---
 
