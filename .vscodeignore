@@ -16,7 +16,7 @@ _SATURNO/**
 **/*.ts
 **/tsconfig.json
 Libraries/**
-out/Tests/**
+out-tests/**
 out/Libraries/**/Tests/**
 Saturno.CICD/**
 Scripts/**

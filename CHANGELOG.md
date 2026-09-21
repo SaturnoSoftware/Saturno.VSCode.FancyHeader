@@ -38,6 +38,11 @@ All notable changes to Saturno FancyHeader are documented here.
   `node --test` at `out/Libraries/.../tests/*.test.js`, a path the compiler never wrote, and
   node ignores a glob that matches nothing rather than failing. The suite reports 325 tests
   now, against 173 before, with no new test written for the difference.
+- The test suite raced its own build gate. `Tests/productionBuildIsolation.test.ts` runs the
+  real `Scripts/build.ps1`, which wipes `./out` unconditionally - the same directory the rest
+  of the suite had just been compiled into. Whether the run survived depended on how far node
+  had got loading the remaining files. The suite compiles to `out-tests/` now, which the build
+  never touches.
 - `npm run lint`, `npm test`, `tsconfig.json`'s `exclude` and `.vscodeignore` all spelled the
   test directory `tests` while the directory on disk is `Tests`. Every one of them only
   resolved because Windows does not distinguish the two; the directory is tracked as `Tests`
