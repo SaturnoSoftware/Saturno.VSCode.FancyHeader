@@ -30,6 +30,7 @@
     ]
   },
   "publication": {
+    "github_release": true,
     "vscode_marketplace": true
   }
 }
