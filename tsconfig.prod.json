@@ -1,0 +1,8 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "sourceMap": false
+  },
+  "//": "Production build. Source/dev is excluded here, so out/Source/dev never exists and the guarded require in Extension.ts finds nothing to load. This is the whole dev/prod mechanism: not a runtime flag, an absent file. Source/dev is also the only module allowed to import FancyLib's Source/Debug entry point, so excluding it is what keeps the dev-only Open Bug domain out of a production build.",
+  "exclude": ["node_modules", ".vscode-test", "Tests", "Source/dev"]
+}

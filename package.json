@@ -1,20 +1,20 @@
 {
   "name": "saturno-fancy-header",
   "displayName": "Saturno FancyHeader",
-  "description": "Insert configurable file header comments with project, date, and author metadata",
+  "description": "Standardize your file headers with reusable templates.",
   "publisher": "SaturnoSoftware",
   "repository": {
     "type": "git",
-    "url": "https://github.com/SaturnoSoftware/vscode-fancy-header.git"
+    "url": "https://github.com/SaturnoSoftware/Saturno.VSCode.FancyHeader.git"
   },
   "bugs": {
-    "url": "https://github.com/SaturnoSoftware/vscode-fancy-header/issues"
+    "url": "https://github.com/SaturnoSoftware/Saturno.VSCode.FancyHeader/issues"
   },
-  "homepage": "https://github.com/SaturnoSoftware/vscode-fancy-header#readme",
-  "main": "./out/src/extension.js",
-  "icon": "res/images/icon.png",
-  "version": "2.0.0",
-  "build": 8,
+  "homepage": "https://github.com/SaturnoSoftware/Saturno.VSCode.FancyHeader#readme",
+  "main": "./out/Source/Extension.js",
+  "icon": "Resources/icons/icon.png",
+  "version": "2.5.2",
+  "build": 41,
   "license": "GPL-3.0-only",
   "engines": {
     "vscode": "^1.88.0"
@@ -39,7 +39,7 @@
   "qna": "marketplace",
   "capabilities": {
     "untrustedWorkspaces": {
-      "supported": true
+      "supported": false
     },
     "virtualWorkspaces": false
   },
@@ -57,8 +57,25 @@
       {
         "command": "saturno-fancy-header.editTemplates",
         "title": "Saturno: Edit Header Templates"
+      },
+      {
+        "command": "saturno-fancy-header.about",
+        "title": "Saturno: About FancyHeader"
+      },
+      {
+        "command": "saturno-fancy-header.dev.reportBug",
+        "title": "Saturno DEV: Report Bug (Open Bug panel)",
+        "category": "Saturno DEV"
       }
     ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "saturno-fancy-header.dev.reportBug",
+          "when": "saturnoFancyHeader.devMode"
+        }
+      ]
+    },
     "configuration": {
       "title": "Saturno FancyHeader",
       "properties": {
@@ -97,8 +114,8 @@
             "  File      : FILENAME",
             "  Project   : PROJECT",
             "  Date      : DATE",
-            "  Copyright : YEAR",
-            "  Copyright : USER_NAME <USER_EMAIL>"
+            "  Copyright : YEAR COPYRIGHT_OWNER",
+            "  Author    : USER_NAME <USER_EMAIL>"
           ],
           "items": {
             "type": "string"
@@ -138,10 +155,10 @@
   "scripts": {
     "compile": "pwsh -NoLogo -NoProfile -Command \"if (Test-Path -LiteralPath ./out) { Remove-Item -LiteralPath ./out -Recurse -Force }\" && tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "lint": "eslint src libs tests --ext ts",
-    "test": "npm run compile && tsc -p tests/tsconfig.json && tsc -p libs/Saturno.VSCodeKit/tests/tsconfig.json && node --test out/tests/*.test.js out/libs/Saturno.VSCodeKit/tests/*.test.js",
+    "lint": "eslint Source Libraries Tests --ext ts",
+    "test": "npm run compile && tsc -p Tests/tsconfig.json && tsc -p Libraries/Saturno.VSCode.FancyLib/Tests/tsconfig.json && node --test out-tests/Tests/*.test.js Libraries/Saturno.VSCode.FancyLib/out/Tests/*.test.js",
     "build": "npm run lint && npm run compile && pwsh -NoLogo -NoProfile -File ./Scripts/build.ps1 -ProjectRoot . -BuildOutputDir __BUILD/_staging",
-    "package": "pwsh -NoLogo -NoProfile -File ./Scripts/package-vsix.ps1",
+    "package": "pwsh -NoLogo -NoProfile -File ./Scripts/package.ps1 -BuildOutputDir __BUILD/_staging",
     "vscode:prepublish": "npm run compile"
   },
   "devDependencies": {
@@ -157,7 +174,7 @@
     "json5": "^2.2.3"
   },
   "vsce": {
-    "baseImagesUrl": "https://raw.githubusercontent.com/SaturnoSoftware/vscode-fancy-header/main/"
+    "baseImagesUrl": "https://raw.githubusercontent.com/SaturnoSoftware/Saturno.VSCode.FancyHeader/main/"
   },
   "saturno": {
     "cicd": {
@@ -166,10 +183,13 @@
         "stagingRoot": "__BUILD/_staging",
         "expectedFiles": [
           "package.json",
-          "out/src/extension.js"
+          "out/Source/Extension.js",
+          "Resources/AboutPage/about.html",
+          "Resources/AboutPage/about.css",
+          "Resources/icons/icon.png"
         ],
         "expectedDirectories": [
-          "out/libs"
+          "out/Libraries"
         ]
       },
       "release": {

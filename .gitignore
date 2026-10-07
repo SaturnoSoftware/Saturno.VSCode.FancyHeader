@@ -1,4 +1,5 @@
 out
+out-tests
 dist
 node_modules
 .vscode-test/
@@ -6,4 +7,3 @@ node_modules
 __BUILD/
 __DIST/
 .claude/
-Saturno.VSCodeFancyHeader.Internal/

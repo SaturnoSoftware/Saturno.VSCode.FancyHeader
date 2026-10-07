@@ -1,6 +1,3 @@
-[submodule "Saturno.CICD"]
-	path = Saturno.CICD
-	url = https://github.com/SaturnoSoftware/Saturno.CICD.git
-[submodule "libs/Saturno.VSCodeKit"]
-	path = libs/Saturno.VSCodeKit
-	url = https://github.com/SaturnoSoftware/Saturno.VSCodeKit.git
+[submodule "Libraries/Saturno.VSCode.FancyLib"]
+	path = Libraries/Saturno.VSCode.FancyLib
+	url = https://github.com/SaturnoSoftware/Saturno.VSCode.FancyLib.git

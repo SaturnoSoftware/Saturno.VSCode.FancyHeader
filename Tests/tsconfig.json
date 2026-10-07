@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "module": "Node16",
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "rootDir": "..",
+    "baseUrl": "..",
+    "outDir": "../out-tests",
+    "types": ["node"]
+  },
+  "//": "Not ../out: Tests/productionBuildIsolation.test.ts runs the real Scripts/build.ps1, which wipes ./out unconditionally. With the suite compiled into ./out, that wipe deletes test files node is still loading, and whether the run survives is a race. Compiling the suite somewhere the build never touches removes the race instead of hiding it.",
+  "include": ["./**/*.test.ts", "../Source/**/*.ts", "../Libraries/**/*.ts"],
+  "exclude": ["../node_modules"]
+}

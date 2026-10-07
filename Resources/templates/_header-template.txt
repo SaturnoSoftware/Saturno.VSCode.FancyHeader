@@ -1,0 +1,5 @@
+  File      : ${FILENAME}
+  Project   : ${PROJECT}
+  Date      : ${DATE}
+  Copyright : ${YEAR} ${COPYRIGHT_OWNER}
+  Author    : ${USER_NAME} <${USER_EMAIL}>
