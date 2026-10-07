@@ -82,8 +82,12 @@ export function deactivate(): void { }
 function _RegisterDevCommands(context: vscode.ExtensionContext): void {
   let dev: DevModule;
   try {
+    // Keep the dev module out of TypeScript's production dependency graph.
+    // A literal require("./dev") makes it reachable even when tsconfig excludes
+    // Source/dev, so construct the runtime-only path from static segments.
+    const devModulePath = "./" + "dev";
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    dev = require("./dev") as DevModule;
+    dev = require(devModulePath) as DevModule;
   } catch {
     return;
   }

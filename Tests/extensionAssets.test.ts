@@ -4,7 +4,6 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 
 const REPOSITORY_ROOT = path.join(__dirname, "..", "..");
-const STAGING_ROOT = path.join(REPOSITORY_ROOT, "__BUILD", "_staging");
 const ABOUT_PAGE_SOURCE = path.join(
   REPOSITORY_ROOT,
   "Libraries",
@@ -15,6 +14,16 @@ const ABOUT_PAGE_SOURCE = path.join(
 
 function readRepositoryFile(relativePath: string): string {
   return fs.readFileSync(path.join(REPOSITORY_ROOT, relativePath), "utf8");
+}
+
+function productionBuildOutput(): string | null {
+  const buildOutputDir = process.env.SATURNO_SPB_BUILD_OUTPUT_DIR;
+  if (buildOutputDir && fs.existsSync(buildOutputDir)) {
+    return buildOutputDir;
+  }
+
+  console.log("    (no SPB production build output; this assertion runs during spb release)");
+  return null;
 }
 
 /**
@@ -78,22 +87,26 @@ describe("extension packaging assets", () => {
     }
   });
 
-  it("stages the About assets into the build output", () => {
-    const buildScript = readRepositoryFile("Scripts/build.ps1");
+  it("declares the About assets for the SPB VSIX driver", () => {
+    const project = JSON.parse(readRepositoryFile("spb.project.json")) as {
+      driver: { extra_stage_items: Array<{ source: string; destination: string }> };
+    };
 
-    assert.match(buildScript, /Libraries\/Saturno\.VSCode\.FancyLib\/Source\/AboutPage/);
-    assert.match(buildScript, /Resources\/AboutPage/);
-    assert.match(buildScript, /"about\.html", "about\.css"/);
+    assert.deepEqual(project.driver.extra_stage_items, [
+      {
+        source: "Libraries/Saturno.VSCode.FancyLib/Source/AboutPage/about.html",
+        destination: "Resources/AboutPage",
+      },
+      {
+        source: "Libraries/Saturno.VSCode.FancyLib/Source/AboutPage/about.css",
+        destination: "Resources/AboutPage",
+      },
+    ]);
   });
 
-  it("has the About assets present in the staged tree when a build has run", () => {
-    // it.skip is unavailable under this repo's minimal node:test ambient
-    // declarations, so an absent staging directory logs and returns - running
-    // the suite without having run a build is normal, and is not a failure.
-    if (!fs.existsSync(STAGING_ROOT)) {
-      console.log("    (no __BUILD/_staging on disk; run npm run build to exercise this check)");
-      return;
-    }
+  it("has the About assets present in the SPB production build", () => {
+    const stagingRoot = productionBuildOutput();
+    if (!stagingRoot) return;
 
     // This is the assertion that catches a missing asset: it looks at the
     // directory Scripts/package.ps1 actually turns into the vsix.
@@ -104,7 +117,7 @@ describe("extension packaging assets", () => {
       path.join("out", "Source", "Extension.js"),
     ]) {
       assert.ok(
-        fs.existsSync(path.join(STAGING_ROOT, relativePath)),
+        fs.existsSync(path.join(stagingRoot, relativePath)),
         `${relativePath} is missing from the staged build output, so it will not ship`
       );
     }
