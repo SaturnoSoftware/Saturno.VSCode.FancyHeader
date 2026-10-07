@@ -89,7 +89,11 @@ describe("extension packaging assets", () => {
 
   it("declares the About assets for the SPB VSIX driver", () => {
     const project = JSON.parse(readRepositoryFile("spb.project.json")) as {
-      driver: { extra_stage_items: Array<{ source: string; destination: string }> };
+      driver: {
+        stage_items: string[];
+        extra_stage_items: Array<{ source: string; destination: string }>;
+        package_items: string[];
+      };
     };
 
     assert.deepEqual(project.driver.extra_stage_items, [
@@ -102,6 +106,8 @@ describe("extension packaging assets", () => {
         destination: "Resources/AboutPage",
       },
     ]);
+    assert.ok(project.driver.stage_items.includes(".vscodeignore"));
+    assert.ok(project.driver.package_items.includes(".vscodeignore"));
   });
 
   it("has the About assets present in the SPB production build", () => {
